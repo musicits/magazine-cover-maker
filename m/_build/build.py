@@ -152,7 +152,8 @@ js = rep(js, '''      im.onload = ()=>{
 '''      /* 아이폰 HEIC 처럼 브라우저가 못 여는 형식이면 조용히 사라지지 않게 알려준다 */
       im.onerror = ()=>{
         if(++done === files.length){ syncZoom(); markPhoto(); render(); }
-        toast("이 사진은 열 수 없어요 — " + f.name);
+        if(typeof rescueImage === "function") rescueImage(f);   /* HEIC 는 아래에서 변환해 다시 시도 */
+        else toast("이 사진은 열 수 없어요 — " + f.name);
       };
       im.onload = ()=>{
         const o = {img:im, name:f.name.replace(/\\.[^.]+$/,""), x:0, y:0, scale:1};''')

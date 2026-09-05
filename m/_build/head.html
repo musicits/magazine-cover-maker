@@ -47,13 +47,13 @@ __TOKENS__
         -webkit-backdrop-filter:blur(26px) saturate(180%);
         backdrop-filter:blur(26px) saturate(180%);
         border-bottom:1px solid var(--line)}
-  #brand{height:13px;width:auto;display:block;flex:0 0 auto;filter:invert(1)}
+  #ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+  #brand{height:18px;width:auto;display:block;max-width:100%;filter:invert(1)}
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #brand{filter:none} }
   :root[data-theme="dark"] #brand{filter:none}
-  h1{margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-     font:700 11px/1 "Bodoni Moda","Playfair Display",Georgia,serif;
-     letter-spacing:.10em;text-transform:uppercase}
-  @media (max-width:339px){ h1{display:none} }
+  h1{margin:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+     font:500 11.5px/1 "Noto Sans KR",system-ui,sans-serif;
+     letter-spacing:.02em;color:var(--tx2)}
   button.ic{width:34px;height:34px;flex:0 0 34px;padding:0;border-radius:50%;min-height:0;
             display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
   button.ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;

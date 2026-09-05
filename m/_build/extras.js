@@ -260,6 +260,50 @@ $("#pickFiles").onclick = ()=>$("#fileAny").click();
 $("#drop").onclick = ()=>openPick();
 $("#empty").onclick = ()=>openPick();
 
+/* ---------------- 아이폰 HEIC 사진 ----------------
+   사파리는 HEIC 를 그냥 열지만 안드로이드 크롬은 못 연다.
+   그래서 ‘열지 못했을 때만’ 변환기를 내려받아 JPG 로 바꿔 다시 넣는다.
+   (평소에는 아무것도 받지 않는다. 아이폰에서는 이 길로 오지도 않는다.) */
+const HEIC_LIB = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js";
+let heicLib = null;
+function loadHeic(){
+  if(heicLib) return heicLib;
+  heicLib = new Promise((ok, no)=>{
+    const s = document.createElement("script");
+    s.src = HEIC_LIB;
+    s.onload = ()=>ok(window.heic2any);
+    s.onerror = ()=>no(new Error("no net"));
+    document.head.appendChild(s);
+  });
+  return heicLib;
+}
+const isHeic = f => /\.(heic|heif)$/i.test(f.name || "") || /image\/hei[cf]/i.test(f.type || "");
+
+async function rescueImage(f){
+  if(!isHeic(f)){
+    toast("이 사진은 열 수 없어요 — " + (f.name || ""));
+    return;
+  }
+  progOpen("아이폰 사진(HEIC) 변환", 1);
+  progStep(f.name, 0, 1);
+  await breathe();
+  try{
+    const conv = await loadHeic();
+    const out = await conv({blob:f, toType:"image/jpeg", quality:0.94});
+    const blob = Array.isArray(out) ? out[0] : out;
+    const jpg = new File([blob], (f.name || "photo").replace(/\.(heic|heif)$/i, "") + ".jpg",
+                         {type:"image/jpeg"});
+    progStep(f.name, 1, 1);
+    await breathe();
+    progClose();
+    addFiles([jpg]);
+    done("아이폰 사진(HEIC)을 변환해서 넣었습니다");
+  }catch(e){
+    progClose();
+    toast("HEIC 변환에 실패했어요 — ‘사진 앨범’ 으로 고르면 자동 변환됩니다");
+  }
+}
+
 /* ---------------- 화면 상태 갱신 (엔진의 render() 에 얹는다) ---------------- */
 const _render = render;
 let filmOn = null;
