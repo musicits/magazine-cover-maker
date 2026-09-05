@@ -41,7 +41,9 @@ js = rep(js, "const PV = 2;",
 js = rep(js,
     '  const s = Math.min(($("#stage").clientWidth - 32)/DW, (window.innerHeight - 92)/DH);',
     '  const st = $("#stage");\n'
-    '  const s = Math.max(0.02, Math.min((st.clientWidth - 18)/DW, (st.clientHeight - 14)/DH));')
+    '  const cs = getComputedStyle(st);\n'
+    '  const av = st.clientHeight - (parseFloat(cs.paddingTop)||0) - (parseFloat(cs.paddingBottom)||0);\n'
+    '  const s = Math.max(0.02, Math.min((st.clientWidth - 18)/DW, (av - 4)/DH));')
 
 drag_old = '''let drag = null;
 cv.addEventListener("mousedown", e=>{

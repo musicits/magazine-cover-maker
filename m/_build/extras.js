@@ -79,6 +79,9 @@ function relayout(){
   layoutPending = true;
   requestAnimationFrame(()=>{
     layoutPending = false;
+    /* 조절판이 덮는 높이 — 미리보기는 그 위 공간에 맞춰 커진다 */
+    document.documentElement.style.setProperty("--trayH",
+      (trayEl.classList.contains("on") ? trayEl.offsetHeight : 0) + "px");
     layout(); render();
     /* 곡선판은 숨어 있는 동안 크기를 잴 수 없다 — 보일 때 다시 그린다 */
     if(secs[12] && secs[12].classList.contains("on")) drawCurve();
@@ -142,8 +145,11 @@ function closeTray(){
   relayout();
 }
 /* 조절판 머리글(제목·↺·✕)을 누르면 접는다 — 열고 닫기는 항목 줄이 맡는다 */
-secs.forEach(d=>{
-  d.querySelector("summary").addEventListener("click", e=>{ e.preventDefault(); closeTray(); });
+secs.forEach((d, i)=>{
+  const sm = d.querySelector("summary");
+  const c = CATS.find(x=>x.i === i);
+  if(c && sm.firstChild && sm.firstChild.nodeType === 3) sm.firstChild.nodeValue = c.label;
+  sm.addEventListener("click", e=>{ e.preventDefault(); closeTray(); });
 });
 /* 미리보기에서 요소를 누르면 그 항목이 열린다 (엔진의 탭 판정이 부른다) */
 function openSection(key){
@@ -266,22 +272,82 @@ render = function(){
   if(want !== filmOn){ filmOn = want; filmEl.classList.toggle("on", want); relayout(); }
 };
 
+/* ---------------- 저장 진행창 · 완료 알림 ---------------- */
+const progBg = $("#progBg");
+let cancelJob = false;
+function progOpen(title, total){
+  cancelJob = false;
+  $("#progTitle").textContent = title;
+  $("#progName").textContent = "";
+  $("#progCount").textContent = "0/" + total;
+  $("#progFill").style.width = "0%";
+  progBg.classList.add("on");
+}
+function progStep(name, i, total){
+  $("#progName").textContent = name;
+  $("#progCount").textContent = i + "/" + total;
+  $("#progFill").style.width = Math.round(i/total*100) + "%";
+}
+function progClose(){ progBg.classList.remove("on"); }
+$("#progCancel").onclick = ()=>{ cancelJob = true; progClose(); };
+
+let doneT = null;
+function done(msg){
+  $("#doneTxt").textContent = msg;
+  $("#done").classList.add("on");
+  clearTimeout(doneT); doneT = setTimeout(()=>$("#done").classList.remove("on"), 3200);
+}
+$("#doneX").onclick = ()=>$("#done").classList.remove("on");
+/* 화면이 한 번 그려질 틈을 준다 — 안 그러면 진행창이 안 보인 채 멈춘 것처럼 보인다 */
+const breathe = ()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r, 30)));
+
 /* ---------------- 저장 · 공유 ---------------- */
 $("#save").onclick = async ()=>{
   if(cur < 0) return toast("사진을 먼저 넣어주세요");
-  toast("저장하는 중…");
-  await new Promise(r=>setTimeout(r, 40));
-  await download(exportCanvas(cur, +$("#expW").value), "cover_" + imgs[cur].name);
-  toast("저장했습니다");
+  const name = "cover_" + imgs[cur].name;
+  progOpen("커버 저장", 1);
+  progStep(name + ".png", 0, 1);
+  await breathe();
+  await download(exportCanvas(cur, +$("#expW").value), name);
+  progStep(name + ".png", 1, 1);
+  await breathe();
+  progClose();
+  done("저장했습니다 · " + $("#expW").value + "px · 사진 앨범에 넣으려면 [공유]");
+};
+
+/* 넣어둔 사진 전부를 같은 디자인으로 — 중간에 취소할 수 있다 */
+$("#saveAll").onclick = async ()=>{
+  if(!imgs.length) return toast("사진을 먼저 넣어주세요");
+  const w = +$("#expW").value, n = imgs.length;
+  progOpen("전체 사진 저장", n);
+  await breathe();
+  let k = 0;
+  for(let i = 0; i < n; i++){
+    if(cancelJob) break;
+    const name = "cover_" + imgs[i].name;
+    progStep(name + ".png", i, n);
+    await breathe();
+    await download(exportCanvas(i, w), name);
+    k++;
+    progStep(name + ".png", k, n);
+    if(!dlCap) await new Promise(r=>setTimeout(r, 380));
+  }
+  progClose(); render();
+  done(cancelJob ? (k + "장까지 저장하고 멈췄습니다") : (k + "장을 저장했습니다"));
 };
 async function shareCover(){
   if(cur < 0) return toast("사진을 먼저 넣어주세요");
-  toast("만드는 중…");
-  await new Promise(r=>setTimeout(r, 40));
+  const nm = "cover_" + imgs[cur].name;
+  progOpen("공유 준비", 1);
+  progStep(nm + ".png", 0, 1);
+  await breathe();
   const c = exportCanvas(cur, +$("#expW").value);
   const b = await new Promise(r=>c.toBlob(r, "image/png"));
+  progStep(nm + ".png", 1, 1);
+  await breathe();
+  progClose();
   if(!b) return toast("만들지 못했습니다");
-  const file = new File([b], "cover_" + imgs[cur].name + ".png", {type:"image/png"});
+  const file = new File([b], nm + ".png", {type:"image/png"});
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{ await navigator.share({files:[file], title:"매거진 커버"}); }
     catch(err){ if(err && err.name !== "AbortError") toast("공유하지 못했습니다"); }
@@ -289,7 +355,7 @@ async function shareCover(){
     const a = document.createElement("a");
     a.href = URL.createObjectURL(b); a.download = file.name; a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-    toast("공유를 지원하지 않아 저장했습니다");
+    done("공유를 지원하지 않아 파일로 저장했습니다");
   }
 }
 $("#share").onclick     = shareCover;
