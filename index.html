@@ -318,16 +318,14 @@
   <details class="sec" data-hl="overlay">
     <summary>3-1. 로고 앞으로 (사진 겹치기)</summary>
     <div class="body">
-      <div class="row"><label class="k">방식</label><select id="ovMode">
-        <option value="none">사용 안 함</option>
-        <option value="ellipse">타원 영역 (얼굴·머리)</option>
-        <option value="png">인물 PNG (누끼)</option></select></div>
-      <div class="hint">제호를 그린 다음 이 영역만 사진을 다시 얹습니다. 모델이 로고 앞으로 나옵니다.</div>
+      <div class="row"><label class="k">겹치기</label>
+        <label class="sw"><input type="checkbox" id="ovOn"><span>모델을 로고 앞으로</span></label></div>
+      <div class="hint">제호를 그린 뒤 그 위에 사진을 다시 얹습니다. 겹치는 부분은 <b>완전히 불투명</b>해서 로고가 비치지 않습니다.<br>인물 PNG를 넣으면 그걸 쓰고, 없으면 아래 타원 영역을 씁니다. 이 메뉴를 열면 범위가 점선으로 보입니다.</div>
       <div class="row"><label class="k">가로 위치</label><input type="range" id="ovX" min="0" max="100" step="0.5" value="50"><span class="val" id="ovXV">50%</span></div>
-      <div class="row"><label class="k">세로 위치</label><input type="range" id="ovY" min="0" max="100" step="0.5" value="26"><span class="val" id="ovYV">26%</span></div>
-      <div class="row"><label class="k">폭</label><input type="range" id="ovW" min="5" max="120" step="0.5" value="46"><span class="val" id="ovWV">46%</span></div>
-      <div class="row"><label class="k">높이</label><input type="range" id="ovH" min="5" max="120" step="0.5" value="34"><span class="val" id="ovHV">34%</span></div>
-      <div class="row"><label class="k">가장자리</label><input type="range" id="ovFeather" min="0" max="90" step="1" value="22"><span class="val" id="ovFeatherV">22%</span></div>
+      <div class="row"><label class="k">세로 위치</label><input type="range" id="ovY" min="0" max="100" step="0.5" value="30"><span class="val" id="ovYV">26%</span></div>
+      <div class="row"><label class="k">폭</label><input type="range" id="ovW" min="5" max="120" step="0.5" value="60"><span class="val" id="ovWV">46%</span></div>
+      <div class="row"><label class="k">높이</label><input type="range" id="ovH" min="5" max="120" step="0.5" value="48"><span class="val" id="ovHV">34%</span></div>
+      <div class="row"><label class="k">가장자리</label><input type="range" id="ovFeather" min="0" max="90" step="1" value="9"><span class="val" id="ovFeatherV">22%</span></div>
       <div class="btns"><button id="ovPick">인물 PNG 불러오기</button><button id="ovClear">PNG 비우기</button></div>
       <input type="file" id="ovFile" accept="image/png,image/webp" hidden>
       <div class="hint" id="ovInfo">투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다.</div>
@@ -1495,17 +1493,24 @@ function drawTo(c, S, photo, hlKey){
     }
   }
 
-  if(hlKey === "ratio") marquee(c, {x:M, y:M, w:W-2*M, h:H-2*M}, W);
+  if(hlKey === "overlay" && blocks.overlay){
+    const b = blocks.overlay;
+    c.save();
+    c.strokeStyle = "rgba(255,86,116,.95)"; c.lineWidth = W*0.004;
+    c.setLineDash([W*0.016, W*0.011]);
+    c.beginPath(); c.ellipse(b.x+b.w/2, b.y+b.h/2, b.w/2, b.h/2, 0, 0, Math.PI*2); c.stroke();
+    c.restore();
+  }
+  else if(hlKey === "ratio") marquee(c, {x:M, y:M, w:W-2*M, h:H-2*M}, W);
   else if(hlKey && blocks[hlKey]) marquee(c, blocks[hlKey], W);
 }
 
 /* 제호 위로 인물을 얹는다 — 타원 마스크 또는 누끼 PNG */
 let subjImg = null;
 function overlaySubject(c, W, H, photo){
-  const mode = $("#ovMode").value;
   const o = imgs[cur];
-  if(mode === "none" || !o) return;
-  if(mode === "png" && !subjImg) return;
+  if(!$("#ovOn").checked || !o) return;
+  const mode = subjImg ? "png" : "ellipse";   /* 누끼가 있으면 그걸 우선 */
   const t = document.createElement("canvas");
   t.width = W; t.height = H;
   const tc = t.getContext("2d");
@@ -1519,7 +1524,11 @@ function overlaySubject(c, W, H, photo){
     tc.save();
     tc.translate(cx, cy); tc.scale(Math.max(1, rx), Math.max(1, ry));
     const rg = tc.createRadialGradient(0, 0, 0, 0, 0, 1);
-    rg.addColorStop(Math.max(0, 1 - fe), "rgba(0,0,0,1)");
+    /* 안쪽은 100% 불투명 — 로고가 비쳐 보이지 않게. 바깥 테두리만 부드럽게 */
+    const edge = Math.max(0.02, fe);
+    rg.addColorStop(0, "rgba(0,0,0,1)");
+    rg.addColorStop(Math.max(0, 1 - edge), "rgba(0,0,0,1)");
+    rg.addColorStop(Math.max(0.001, 1 - edge*0.35), "rgba(0,0,0,.86)");
     rg.addColorStop(1, "rgba(0,0,0,0)");
     tc.fillStyle = rg; tc.fillRect(-1, -1, 2, 2);
     tc.restore();
@@ -1528,6 +1537,11 @@ function overlaySubject(c, W, H, photo){
     tc.drawImage(subjImg, o.x, o.y, subjImg.width*o.scale*k, subjImg.height*o.scale*k);
   }
   c.drawImage(t, 0, 0, W, H);
+  if(mode === "ellipse"){
+    const cx = W*(parseFloat($("#ovX").value)/100), cy = H*(parseFloat($("#ovY").value)/100);
+    const rx = W*(parseFloat($("#ovW").value)/100)/2, ry = H*(parseFloat($("#ovH").value)/100)/2;
+    blocks.overlay = {x:cx-rx, y:cy-ry, w:rx*2, h:ry*2, ellipse:true};
+  }
 }
 
 /* 편집 중인 요소를 포토샵식 점선 박스로 표시 (내보내기에는 안 들어감) */
@@ -1733,8 +1747,8 @@ const KEYS = ["presetSel","margin","mast","kicker","kickAlign","mastFont","mastW
   "fExp","fCon","fHi","fSh","fWh","fBl","fTmp","fTint","fVib","fSat","fGry",
   "fGrain","fVig","fTop","fBot","fltName","fltAmt",
   "logoPos","logoSize","logoPad","logoNudge","logoC","logoO","logoSh",
-  "ovMode","ovX","ovY","ovW","ovH","ovFeather","expW"];
-const CHECKS = ["mastFit","logoOn","logoAvoid","kickItalic","mastNoFill"];
+  "ovX","ovY","ovW","ovH","ovFeather","expW"];
+const CHECKS = ["mastFit","logoOn","logoAvoid","kickItalic","mastNoFill","ovOn"];
 function save(){
   const d = {ratioIdx:ratioIdx, curves:curves,
              issueChar:$("#issueChar").value, kickChar:$("#kickChar").value};
@@ -1867,7 +1881,7 @@ const SEC_FIELDS = {
   head:  ["txtH","hSize","hY","hLh","hAlign","hC","accC","hFont"],
   body:  ["bodyFont","barcode"],
   grain: ["fGrain","fVig","fTop","fBot"],
-  overlay: ["ovMode","ovX","ovY","ovW","ovH","ovFeather"],
+  overlay: ["ovOn","ovX","ovY","ovW","ovH","ovFeather"],
   light: ["fExp","fCon","fHi","fSh","fWh","fBl"],
   color: ["fTmp","fTint","fVib","fSat","fGry"],
   filter: ["fltName","fltAmt"],
@@ -1913,8 +1927,8 @@ $("#ovFile").onchange = e=>{
   const r = new FileReader();
   r.onload = ev=>{
     const im = new Image();
-    im.onload = ()=>{ subjImg = im; $("#ovMode").value = "png";
-                      $("#ovInfo").textContent = "인물 PNG: " + f.name;
+    im.onload = ()=>{ subjImg = im; $("#ovOn").checked = true;
+                      $("#ovInfo").textContent = "인물 PNG 사용 중 — " + f.name + " (타원 설정은 무시됩니다)";
                       render(); save(); };
     im.src = ev.target.result;
   };
@@ -1923,8 +1937,7 @@ $("#ovFile").onchange = e=>{
 };
 $("#ovClear").onclick = ()=>{
   subjImg = null;
-  if($("#ovMode").value === "png") $("#ovMode").value = "none";
-  $("#ovInfo").textContent = "투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다.";
+  $("#ovInfo").textContent = "투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다. 없으면 타원 영역으로 동작합니다.";
   render(); save();
 };
 
