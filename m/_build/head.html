@@ -34,7 +34,7 @@ __TOKENS__
   #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
   /* ---------- 상단 바 ---------- */
-  #head{flex:0 0 auto;display:flex;align-items:center;gap:9px;z-index:7;
+  #head{flex:0 0 auto;display:flex;align-items:center;gap:8px;z-index:7;
         padding:calc(env(safe-area-inset-top) + 7px) 12px 7px;
         padding-left:calc(env(safe-area-inset-left) + 12px);
         padding-right:calc(env(safe-area-inset-right) + 12px);
@@ -48,15 +48,13 @@ __TOKENS__
   h1{margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
      font:700 11px/1 "Bodoni Moda","Playfair Display",Georgia,serif;
      letter-spacing:.10em;text-transform:uppercase}
-  @media (max-width:359px){ h1{display:none} }
-  #theme{display:flex;border:1px solid var(--fieldBd);border-radius:999px;overflow:hidden;
-         flex:0 0 auto;background:var(--field);box-shadow:var(--fieldSh)}
-  #theme button{border:0;border-radius:0;padding:6px 8px;font-size:10.5px;background:transparent;
-                color:var(--tx2);min-height:0;box-shadow:none}
-  #theme button+button{border-left:1px solid var(--line)}
-  #theme button.on{background:var(--acc);color:var(--accTx);font-weight:700}
-  #helpBtn{width:29px;height:29px;flex:0 0 29px;padding:0;border-radius:50%;
-           font-size:14px;font-weight:800;line-height:1;min-height:0}
+  @media (max-width:339px){ h1{display:none} }
+  button.ic{width:34px;height:34px;flex:0 0 34px;padding:0;border-radius:50%;min-height:0;
+            display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+  button.ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;
+                stroke-linecap:round;stroke-linejoin:round}
+  button.ic.on{background:var(--acc);color:var(--accTx);border-color:transparent;
+               box-shadow:0 5px 14px rgba(220,63,92,.30)}
 
   /* ---------- 미리보기 ---------- */
   #stage{flex:1 1 auto;min-height:0;position:relative;display:flex;
@@ -69,59 +67,80 @@ __TOKENS__
        -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
        border:1px solid var(--gEdge);pointer-events:none;max-width:92%;
        white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #empty{position:absolute;inset:9px;display:flex;flex-direction:column;gap:9px;
-         align-items:center;justify-content:center;text-align:center;
-         border:1.5px dashed var(--sb);border-radius:14px;color:var(--tx2);font-size:13px;
-         background:var(--glass2)}
+  #empty{position:absolute;inset:9px;display:flex;align-items:center;justify-content:center;
+         text-align:center;border:1.5px dashed var(--sb);border-radius:14px;background:var(--glass2)}
   #empty.off{display:none}
-  #empty b{display:block;font-size:15px;color:var(--tx);margin-bottom:2px}
+  #empty .msg{padding:15px 20px;border-radius:15px;color:var(--tx2);font-size:12.5px;line-height:1.6;
+              background:var(--glass);border:1px solid var(--gEdge);box-shadow:var(--gShadow);
+              -webkit-backdrop-filter:blur(16px) saturate(180%);
+              backdrop-filter:blur(16px) saturate(180%)}
+  #empty b{display:block;font-size:15px;color:var(--tx);margin-bottom:4px}
 
-  /* ---------- 하단 시트 ---------- */
-  #sheet{flex:0 0 auto;display:flex;flex-direction:column;min-height:0;height:56vh;z-index:6;
-         background:var(--glass);
-         -webkit-backdrop-filter:blur(26px) saturate(180%);
-         backdrop-filter:blur(26px) saturate(180%);
-         border-top:1px solid var(--gEdge);border-radius:19px 19px 0 0;
-         box-shadow:0 -12px 34px rgba(20,20,45,.14)}
-  #grab{flex:0 0 auto;height:24px;display:flex;align-items:center;justify-content:center;
-        touch-action:none;user-select:none}
-  #grab::after{content:"";width:46px;height:5px;border-radius:3px;background:var(--sb)}
-  #tabs{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;
-        padding:0 12px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  #tabs::-webkit-scrollbar{display:none}
-  #tabs .tab{flex:0 0 auto;padding:7px 13px;border:1px solid var(--fieldBd);border-radius:999px;
-             font-size:12.5px;background:var(--field);color:var(--tx2);
-             box-shadow:var(--fieldSh);white-space:nowrap}
-  #tabs .tab.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
-  #side{flex:1 1 auto;min-height:0;overflow-y:auto;position:relative;
-        padding:0 12px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-  #side::after{content:"";display:block;height:16px}   /* 마지막 항목 아래 숨 쉴 공간 */
-  #side::-webkit-scrollbar{width:8px}
+  /* ---------- 하단 도구바 (라이트룸식) ---------- */
+  #bottom{flex:0 0 auto;z-index:6;
+          background:var(--glass);
+          -webkit-backdrop-filter:blur(26px) saturate(180%);
+          backdrop-filter:blur(26px) saturate(180%);
+          border-top:1px solid var(--gEdge);
+          padding-bottom:env(safe-area-inset-bottom)}
+
+  /* 조절판 — 고른 항목의 슬라이더만 올라온다 */
+  #tray{display:none;border-bottom:1px solid var(--line)}
+  #tray.on{display:block}
+  #side{max-height:38dvh;overflow-y:auto;overscroll-behavior:contain;
+        padding:0 14px;-webkit-overflow-scrolling:touch}
+  #side::-webkit-scrollbar{width:7px}
   #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:4px}
-  #dock{flex:0 0 auto;display:flex;gap:6px;align-items:center;
-        padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);
-        padding-left:calc(env(safe-area-inset-left) + 12px);
-        padding-right:calc(env(safe-area-inset-right) + 12px);
-        border-top:1px solid var(--line)}
-  #dock button{flex:0 0 auto}
-  #dock .sp{flex:1 1 auto}
-  #nav{display:flex;align-items:center;gap:2px;font-size:11.5px;color:var(--tx2);
-       font-variant-numeric:tabular-nums}
-  #nav button{padding:8px 10px}
-  #nav.off{display:none}
+  #side::after{content:"";display:block;height:10px}
+  #side.tall{max-height:48dvh}            /* 곡선처럼 넓게 봐야 하는 항목 */
 
-  /* ---------- 섹션 ---------- */
-  .sec{border:1px solid var(--gEdge);border-radius:15px;margin-bottom:9px;overflow:hidden;
-       background:var(--glass2);
-       -webkit-backdrop-filter:blur(16px) saturate(160%);
-       backdrop-filter:blur(16px) saturate(160%);scroll-margin-top:4px}
-  .sec>summary{cursor:pointer;padding:13px 13px;font-weight:700;font-size:13.5px;list-style:none;
-               display:flex;justify-content:space-between;align-items:center;user-select:none}
+  .sec{display:none;border:0;border-radius:0;margin:0;background:transparent;overflow:visible}
+  .sec.on{display:block}
+  .sec>summary{position:sticky;top:0;z-index:2;cursor:pointer;list-style:none;user-select:none;
+               display:flex;align-items:center;gap:8px;
+               padding:11px 0 9px;font-weight:700;font-size:13.5px;
+               background:var(--glass);border-bottom:1px solid var(--line)}
   .sec>summary::-webkit-details-marker{display:none}
-  .sec>summary::after{content:"\25BE";color:var(--tx2);font-size:11px}
-  .sec[open]>summary::after{content:"\25B4"}
-  .sec .body{padding:8px 13px 15px;border-top:1px solid var(--line)}
+  .sec>summary::after{content:"\2715";color:var(--tx2);font-size:15px;margin-left:auto;padding:0 2px}
+  .sec .body{padding:4px 0 6px;border:0}
+  .sec>summary button{min-height:0;padding:3px 9px;border-radius:8px}
 
+  /* 필름스트립 — 사진 두 장 이상이고 조절판이 접혀 있을 때만 */
+  #film{display:none;gap:6px;overflow-x:auto;padding:8px 12px 0;-webkit-overflow-scrolling:touch}
+  #film.on{display:flex}
+  #tray.on ~ #film{display:none}
+  #thumbs{display:flex;gap:6px}
+  .th{position:relative;flex:0 0 46px;width:46px;aspect-ratio:3/4;border-radius:7px;overflow:hidden;
+      border:2px solid transparent;background:#000}
+  .th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .th.on{border-color:var(--acc)}
+  .th .x{position:absolute;top:0;right:0;width:17px;height:17px;border-radius:0 0 0 7px;
+         background:#000a;color:#fff;font-size:11px;line-height:17px;text-align:center}
+
+  /* 항목 줄 (지금 단계 안의 메뉴들) */
+  #cats{display:flex;gap:0;overflow-x:auto;padding:7px 6px 3px;
+        scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #cats::-webkit-scrollbar{display:none}
+  .cat{flex:0 0 auto;min-width:60px;padding:5px 6px;background:none;border:0;box-shadow:none;
+       min-height:0;border-radius:10px;color:var(--tx2);font-size:10.5px;line-height:1.2;
+       display:flex;flex-direction:column;align-items:center;gap:5px}
+  .cat svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;
+           stroke-linecap:round;stroke-linejoin:round}
+  .cat.on{color:var(--acc);font-weight:700}
+  .cat.on svg{stroke-width:1.9}
+
+  /* 단계 줄 — 사진 → 커버 → 보정 → 내보내기 */
+  #modes{display:flex;gap:5px;padding:5px 10px 7px;border-top:1px solid var(--line)}
+  .mode{flex:1 1 0;min-width:0;padding:7px 0 6px;background:none;border:0;box-shadow:none;
+        min-height:0;border-radius:13px;color:var(--tx2);font-size:10.5px;line-height:1.2;
+        display:flex;flex-direction:column;align-items:center;gap:4px}
+  .mode svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;
+            stroke-linecap:round;stroke-linejoin:round}
+  .mode .n{font-size:10.5px}
+  .mode .s{font-size:9px;opacity:.75}
+  .mode.on{background:var(--acc);color:var(--accTx);font-weight:700}
+
+  /* ---------- 조절판 안 요소 ---------- */
   .row{display:flex;align-items:center;gap:9px;margin:11px 0;min-width:0}
   .row label.k{flex:0 0 74px;font-size:12px;color:var(--tx2);line-height:1.3}
   .row .grow{flex:1;min-width:0}
@@ -138,7 +157,7 @@ __TOKENS__
       box-shadow:0 0 0 3px rgba(220,63,92,.18)}
   input[type=text]::placeholder,textarea::placeholder{color:var(--tx2);opacity:.8}
   textarea{resize:vertical;min-height:76px;line-height:1.45}
-  input[type=range]{width:100%;accent-color:var(--acc);height:30px;margin:0;touch-action:pan-y}
+  input[type=range]{width:100%;accent-color:var(--acc);height:32px;margin:0;touch-action:pan-y}
   input[type=color]{width:44px;height:34px;flex:0 0 44px;padding:0;border:1px solid var(--fieldBd);
       border-radius:9px;background:var(--field);box-shadow:var(--fieldSh)}
   .val{flex:0 0 46px;text-align:right;font-size:11px;color:var(--tx2);font-variant-numeric:tabular-nums}
@@ -163,25 +182,24 @@ __TOKENS__
   #drop{border:1.5px dashed var(--sb);border-radius:13px;padding:16px 10px;text-align:center;
         color:var(--tx2);font-size:13px;background:var(--glass2)}
   #drop.over{border-color:var(--acc);color:var(--tx)}
-  #thumbs{display:flex;gap:6px;overflow-x:auto;padding:9px 0 2px;-webkit-overflow-scrolling:touch}
-  #thumbs:empty{display:none}
-  .th{position:relative;flex:0 0 58px;width:58px;aspect-ratio:3/4;border-radius:9px;overflow:hidden;
-      border:2px solid transparent;background:#000}
-  .th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-  .th.on{border-color:var(--acc)}
-  .th .x{position:absolute;top:1px;right:1px;width:20px;height:20px;border-radius:50%;
-         background:#000a;color:#fff;font-size:13px;line-height:20px;text-align:center}
 
   #curveWrap{border:1px solid var(--gEdge);border-radius:11px;overflow:hidden;background:var(--graph)}
-  #curve{display:block;width:100%;height:200px;touch-action:none}
+  #curve{display:block;width:100%;height:190px;touch-action:none}
   .chan{display:flex;gap:5px;margin:9px 0 7px}
   .chan div{flex:1;text-align:center;padding:9px 0;font-size:12px;border-radius:9px;
             border:1px solid var(--fieldBd);background:var(--field);color:var(--tx);
             box-shadow:var(--fieldSh)}
   .chan div.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
 
+  #theme{display:flex;border:1px solid var(--fieldBd);border-radius:999px;overflow:hidden;
+         background:var(--field);box-shadow:var(--fieldSh)}
+  #theme button{flex:1;border:0;border-radius:0;padding:8px 6px;font-size:12px;background:transparent;
+                color:var(--tx2);min-height:0;box-shadow:none}
+  #theme button+button{border-left:1px solid var(--line)}
+  #theme button.on{background:var(--acc);color:var(--accTx);font-weight:700}
+
   #toast{position:fixed;left:50%;transform:translateX(-50%);
-         bottom:calc(var(--sh, 56vh) + 44px);z-index:40;
+         bottom:calc(var(--bh, 130px) + 12px);z-index:40;
          background:var(--glass);color:var(--tx);
          -webkit-backdrop-filter:blur(20px) saturate(180%);
          backdrop-filter:blur(20px) saturate(180%);
@@ -225,10 +243,11 @@ __TOKENS__
   #help b{font-weight:700}
   #help .foot{display:flex;justify-content:flex-end;margin-top:20px}
 
-  /* 화면이 넓으면(태블릿·가로) 여백만 조금 넉넉하게 */
+  /* 화면이 넓으면(태블릿·가로) 조절판 폭만 가운데로 모은다 */
   @media (min-width:700px){
-    #side{padding:0 max(12px, calc((100% - 660px)/2))}
-    #tabs{padding:0 max(12px, calc((100% - 660px)/2)) 8px}
+    #side{padding:0 max(14px, calc((100% - 660px)/2))}
+    #cats{justify-content:center}
+    #modes{max-width:660px;margin:0 auto}
   }
 </style>
 </head>

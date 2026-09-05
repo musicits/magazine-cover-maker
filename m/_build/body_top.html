@@ -3,21 +3,21 @@
   <header id="head">
     <img id="brand" alt="musicITs">
     <h1>Magazine Cover</h1>
-    <button id="helpBtn" title="사용 방법" aria-label="사용 방법">?</button>
-    <div id="theme">
-      <button data-t="dark">다크</button>
-      <button data-t="system">자동</button>
-      <button data-t="light">기본</button>
-    </div>
+    <button id="helpBtn" class="ic" title="사용 방법" aria-label="사용 방법">?</button>
+    <button id="topShare" class="ic" title="공유" aria-label="공유">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
+    </button>
+    <button id="topSave" class="ic on" title="저장" aria-label="저장">
+      <svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></svg>
+    </button>
   </header>
 
   <div id="stage">
     <canvas id="cv"></canvas>
-    <div id="empty"><b>사진을 넣어주세요</b>여기를 눌러 앨범에서 고르기<br>(여러 장 한꺼번에 가능)</div>
+    <div id="empty"><div class="msg"><b>사진을 넣어주세요</b>여기를 눌러 앨범 · 카메라 · 드라이브에서 고르기<br>(여러 장 한꺼번에 가능)</div></div>
     <div id="bar"><span id="info">사진을 넣어주세요</span></div>
   </div>
 
-  <div id="sheet">
-    <div id="grab" title="위아래로 끌면 높이 조절 · 누르면 접기/펴기"></div>
-    <div id="tabs"></div>
-    <div id="side">
+  <div id="bottom">
+    <div id="tray">
+      <div id="side">
