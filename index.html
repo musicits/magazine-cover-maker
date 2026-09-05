@@ -570,6 +570,9 @@
 "use strict";
 const $ = s => document.querySelector(s);
 
+/* render() 가 이 값들을 읽으므로 어떤 코드보다 먼저 초기화해야 한다 */
+var hlBlock = null, hlTimer = null, blocks = {}, subjImg = null, dragMoved = false;
+
 /* ================= 서체 =================
    실제 매거진 제호는 각 사의 전용 레터링이라 그 파일 자체는 쓸 수 없다.
    대신 같은 계통에서 결이 가장 가까운 무료(OFL) 서체를 골라 매거진별로 매칭했다. */
@@ -908,7 +911,6 @@ $("#zoom").oninput = ()=>{
 };
 
 let drag = null;
-let dragMoved = false;
 cv.addEventListener("mousedown", e=>{
   dragMoved = false;
   if(!imgs[cur]) return;
@@ -1179,7 +1181,6 @@ function render(){
     : "사진을 넣어주세요";
 }
 
-let blocks = {};
 function drawTo(c, S, photo, hlKey){
   blocks = {};
   const W = DW, H = DH, u = W/100;
@@ -1506,7 +1507,6 @@ function drawTo(c, S, photo, hlKey){
 }
 
 /* 제호 위로 인물을 얹는다 — 타원 마스크 또는 누끼 PNG */
-let subjImg = null;
 function overlaySubject(c, W, H, photo){
   const o = imgs[cur];
   if(!$("#ovOn").checked || !o) return;
@@ -1863,7 +1863,6 @@ grip.addEventListener("mousedown", e=>{
 grip.addEventListener("dblclick", ()=>setSideW(SIDE_DEF, true));
 
 /* ---- 편집 위치 표시 & 섹션별 초기화 ---- */
-let hlBlock = null, hlTimer = null;
 function setHL(k){
   hlBlock = k; render();
   clearTimeout(hlTimer);
