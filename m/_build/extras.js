@@ -158,8 +158,33 @@ cv.addEventListener("pointercancel", endPtr);
 /* 한 손가락으로 톡 치면 그 자리 요소의 메뉴가 열린다 */
 cv.addEventListener("click", e=>{
   if(dragMoved) return;
-  if(!imgs.length){ $("#file").click(); return; }
+  if(!imgs.length){ openPick(); return; }
 });
+
+/* ---------------- 사진 가져오는 곳 고르기 ----------------
+   앨범 / 카메라 / 파일 앱(구글 드라이브·원드라이브 등)
+   ‘파일’ 쪽 입력칸에는 일부러 accept 를 걸지 않았다. 그래야 안드로이드에서
+   사진 전용 화면이 아니라 드라이브가 보이는 파일 선택 화면이 열린다. */
+const pickBg = $("#pickBg");
+function openPick(v){ pickBg.classList.toggle("on", v !== false); }
+const PICKERS = {album:"#file", cam:"#fileCam", files:"#fileAny"};
+Array.from($("#pick").querySelectorAll("button")).forEach(b=>{
+  b.onclick = ()=>{
+    const k = b.dataset.pick;
+    openPick(false);
+    if(PICKERS[k]) $(PICKERS[k]).click();   /* 누른 그 순간에 바로 열어야 아이폰이 막지 않는다 */
+  };
+});
+pickBg.addEventListener("click", e=>{ if(e.target === pickBg) openPick(false); });
+window.addEventListener("keydown", e=>{ if(e.key === "Escape") openPick(false); });
+
+$("#pickAlbum").onclick = ()=>$("#file").click();
+$("#pickCam").onclick   = ()=>$("#fileCam").click();
+$("#pickFiles").onclick = ()=>$("#fileAny").click();
+["#fileCam", "#fileAny"].forEach(id=>{
+  $(id).onchange = e=>{ addFiles(e.target.files); e.target.value = ""; };
+});
+$("#drop").onclick = ()=>openPick();
 
 /* ---------------- 사진 넘기기 ---------------- */
 function setCur(i){
@@ -169,8 +194,8 @@ function setCur(i){
 }
 $("#prevImg").onclick = ()=>setCur(cur - 1);
 $("#nextImg").onclick = ()=>setCur(cur + 1);
-$("#dockAdd").onclick = ()=>$("#file").click();
-$("#empty").onclick   = ()=>$("#file").click();
+$("#dockAdd").onclick = ()=>openPick();
+$("#empty").onclick   = ()=>openPick();
 
 /* 화면 상태 갱신 — 엔진의 render() 에 얹는다 */
 const _render = render;

@@ -139,10 +139,41 @@ js = rep(js, '  if(!sideStored) fitSideToHeader();\n', '')
 js = rep(js, '"투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다. 없으면 타원 영역으로 동작합니다."',
              '"투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다. 없으면 타원 영역으로 동작합니다."')
 
+js = rep(js, 'if(el.id === "zoom" || el.id === "file") return;',
+             'if(el.id === "zoom" || el.type === "file") return;')
+
+js = rep(js, '  if(!files.length) return;',
+             '  if(!files.length){ toast("사진 파일이 아닙니다"); return; }')
+
+js = rep(js, '''      im.onload = ()=>{
+        const o = {img:im, name:f.name.replace(/\\.[^.]+$/,""), x:0, y:0, scale:1};''',
+'''      /* 아이폰 HEIC 처럼 브라우저가 못 여는 형식이면 조용히 사라지지 않게 알려준다 */
+      im.onerror = ()=>{
+        if(++done === files.length){ syncZoom(); markPhoto(); render(); }
+        toast("이 사진은 열 수 없어요 — " + f.name);
+      };
+      im.onload = ()=>{
+        const o = {img:im, name:f.name.replace(/\\.[^.]+$/,""), x:0, y:0, scale:1};''')
+
 # ---------- 3. 마크업 패치 ----------
 sections = rep(sections,
   '<div id="drop">사진을 여기로 끌어다 놓기<br><span style="font-size:11px">(또는 클릭해서 선택 · 여러 장 가능)</span></div>',
-  '<div id="drop">앨범에서 사진 고르기<br><span style="font-size:11px">(여러 장 한꺼번에 가능)</span></div>')
+  '<div id="drop">여기를 눌러 사진 넣기<br><span style="font-size:11px">(앨범 · 카메라 · 파일/드라이브 · 여러 장 가능)</span></div>')
+
+# 사진을 어디서 가져올지 고를 수 있게 — 기기 앨범 / 카메라 / 파일앱(구글 드라이브 등)
+sections = rep(sections,
+  '      <input type="file" id="file" accept="image/*" multiple hidden>',
+  '      <div class="btns" style="margin-top:8px">\n'
+  '        <button id="pickAlbum">사진 앨범</button>\n'
+  '        <button id="pickCam">카메라</button>\n'
+  '        <button id="pickFiles">파일 · 드라이브</button>\n'
+  '      </div>\n'
+  '      <div class="hint"><b>파일 · 드라이브</b> 는 휴대폰의 파일 앱을 엽니다. 거기서 <b>구글 드라이브</b>·원드라이브·'
+  '다운로드 폴더에 있는 사진도 고를 수 있어요.<br>'
+  '드라이브가 안 보이면 파일 앱(아이폰) 또는 파일 선택 화면(안드로이드)에서 드라이브를 한 번 켜주면 계속 보입니다.</div>\n'
+  '      <input type="file" id="file" accept="image/*" multiple hidden>\n'
+  '      <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>\n'
+  '      <input type="file" id="fileAny" multiple hidden>')
 
 sections = rep(sections,
   '<div class="hint">캔버스에서 <b>드래그</b>하면 위치 이동, <b>휠</b>은 확대/축소.</div>',

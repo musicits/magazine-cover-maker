@@ -240,6 +240,21 @@
          opacity:0;pointer-events:none;transition:.25s}
   #toast.on{opacity:1}
 
+  /* ---------- 사진 가져오기 선택창 ---------- */
+  #pickBg{position:fixed;inset:0;z-index:60;display:none;padding:0;
+          align-items:flex-end;justify-content:center;background:rgba(8,8,18,.42);
+          -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  #pickBg.on{display:flex}
+  #pick{width:100%;max-width:520px;display:flex;flex-direction:column;gap:8px;
+        padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);
+        background:var(--glass);color:var(--tx);
+        -webkit-backdrop-filter:blur(30px) saturate(180%);
+        backdrop-filter:blur(30px) saturate(180%);
+        border:1px solid var(--gEdge);border-radius:20px 20px 0 0;box-shadow:var(--shadow)}
+  #pick .t{font-size:12px;color:var(--tx2);text-align:center;margin:2px 0 4px}
+  #pick button{width:100%;padding:14px;font-size:14.5px;min-height:52px}
+  #pick button.cancel{color:var(--tx2);margin-top:4px}
+
   /* ---------- 사용 방법 ---------- */
   #helpBg{position:fixed;inset:0;z-index:50;display:none;padding:0;
           align-items:flex-end;justify-content:center;background:rgba(8,8,18,.42);
@@ -294,8 +309,16 @@
   <details class="sec" open>
     <summary>1. 사진</summary>
     <div class="body">
-      <div id="drop">앨범에서 사진 고르기<br><span style="font-size:11px">(여러 장 한꺼번에 가능)</span></div>
+      <div id="drop">여기를 눌러 사진 넣기<br><span style="font-size:11px">(앨범 · 카메라 · 파일/드라이브 · 여러 장 가능)</span></div>
+      <div class="btns" style="margin-top:8px">
+        <button id="pickAlbum">사진 앨범</button>
+        <button id="pickCam">카메라</button>
+        <button id="pickFiles">파일 · 드라이브</button>
+      </div>
+      <div class="hint"><b>파일 · 드라이브</b> 는 휴대폰의 파일 앱을 엽니다. 거기서 <b>구글 드라이브</b>·원드라이브·다운로드 폴더에 있는 사진도 고를 수 있어요.<br>드라이브가 안 보이면 파일 앱(아이폰) 또는 파일 선택 화면(안드로이드)에서 드라이브를 한 번 켜주면 계속 보입니다.</div>
       <input type="file" id="file" accept="image/*" multiple hidden>
+      <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+      <input type="file" id="fileAny" multiple hidden>
       <div id="thumbs"></div>
       <div class="hint">미리보기에서 <b>한 손가락</b>으로 끌면 위치 이동, <b>두 손가락</b>을 벌리면 확대·축소.<br>미리보기의 제호·문구를 <b>톡</b> 치면 그 메뉴가 바로 열립니다.</div>
       <div class="row"><label class="k">확대</label><input type="range" id="zoom" min="0.3" max="4" step="0.005" value="1"><span class="val" id="zoomV">1.00</span></div>
@@ -563,6 +586,16 @@
 
 </div><!-- /#app -->
 <div id="toast"></div>
+
+<div id="pickBg">
+  <div id="pick">
+    <div class="t">사진을 어디서 가져올까요?</div>
+    <button data-pick="album">사진 앨범에서 고르기</button>
+    <button data-pick="cam">카메라로 찍기</button>
+    <button data-pick="files">파일 · 구글 드라이브에서</button>
+    <button data-pick="cancel" class="cancel">취소</button>
+  </div>
+</div>
 
 <div id="helpBg">
   <div id="help">
@@ -905,12 +938,17 @@ window.addEventListener("resize", ()=>{ layout(); render(); });
 /* ================= 사진 ================= */
 function addFiles(list){
   const files = Array.from(list).filter(f=>f.type.indexOf("image/")===0);
-  if(!files.length) return;
+  if(!files.length){ toast("사진 파일이 아닙니다"); return; }
   let done = 0;
   files.forEach(f=>{
     const r = new FileReader();
     r.onload = e=>{
       const im = new Image();
+      /* 아이폰 HEIC 처럼 브라우저가 못 여는 형식이면 조용히 사라지지 않게 알려준다 */
+      im.onerror = ()=>{
+        if(++done === files.length){ syncZoom(); markPhoto(); render(); }
+        toast("이 사진은 열 수 없어요 — " + f.name);
+      };
       im.onload = ()=>{
         const o = {img:im, name:f.name.replace(/\.[^.]+$/,""), x:0, y:0, scale:1};
         imgs.push(o); fitImage(o);
@@ -1841,7 +1879,7 @@ try{ savedTheme = localStorage.getItem("magcover_theme") || "system"; }catch(e){
 
 /* ================= 이벤트 ================= */
 document.querySelectorAll("#side input, #side select, #side textarea").forEach(el=>{
-  if(el.id === "zoom" || el.id === "file") return;
+  if(el.id === "zoom" || el.type === "file") return;
   const ev = (el.type === "range" || el.type === "text" || el.tagName === "TEXTAREA") ? "input" : "change";
   el.addEventListener(ev, ()=>{
     sync();
@@ -2150,8 +2188,33 @@ cv.addEventListener("pointercancel", endPtr);
 /* 한 손가락으로 톡 치면 그 자리 요소의 메뉴가 열린다 */
 cv.addEventListener("click", e=>{
   if(dragMoved) return;
-  if(!imgs.length){ $("#file").click(); return; }
+  if(!imgs.length){ openPick(); return; }
 });
+
+/* ---------------- 사진 가져오는 곳 고르기 ----------------
+   앨범 / 카메라 / 파일 앱(구글 드라이브·원드라이브 등)
+   ‘파일’ 쪽 입력칸에는 일부러 accept 를 걸지 않았다. 그래야 안드로이드에서
+   사진 전용 화면이 아니라 드라이브가 보이는 파일 선택 화면이 열린다. */
+const pickBg = $("#pickBg");
+function openPick(v){ pickBg.classList.toggle("on", v !== false); }
+const PICKERS = {album:"#file", cam:"#fileCam", files:"#fileAny"};
+Array.from($("#pick").querySelectorAll("button")).forEach(b=>{
+  b.onclick = ()=>{
+    const k = b.dataset.pick;
+    openPick(false);
+    if(PICKERS[k]) $(PICKERS[k]).click();   /* 누른 그 순간에 바로 열어야 아이폰이 막지 않는다 */
+  };
+});
+pickBg.addEventListener("click", e=>{ if(e.target === pickBg) openPick(false); });
+window.addEventListener("keydown", e=>{ if(e.key === "Escape") openPick(false); });
+
+$("#pickAlbum").onclick = ()=>$("#file").click();
+$("#pickCam").onclick   = ()=>$("#fileCam").click();
+$("#pickFiles").onclick = ()=>$("#fileAny").click();
+["#fileCam", "#fileAny"].forEach(id=>{
+  $(id).onchange = e=>{ addFiles(e.target.files); e.target.value = ""; };
+});
+$("#drop").onclick = ()=>openPick();
 
 /* ---------------- 사진 넘기기 ---------------- */
 function setCur(i){
@@ -2161,8 +2224,8 @@ function setCur(i){
 }
 $("#prevImg").onclick = ()=>setCur(cur - 1);
 $("#nextImg").onclick = ()=>setCur(cur + 1);
-$("#dockAdd").onclick = ()=>$("#file").click();
-$("#empty").onclick   = ()=>$("#file").click();
+$("#dockAdd").onclick = ()=>openPick();
+$("#empty").onclick   = ()=>openPick();
 
 /* 화면 상태 갱신 — 엔진의 render() 에 얹는다 */
 const _render = render;
