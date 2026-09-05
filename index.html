@@ -76,11 +76,11 @@
   #app{display:flex;height:100vh}
 
   /* ---------- 좌측 패널 ---------- */
-  #side{width:390px;flex:0 0 390px;overflow-y:auto;padding:0 14px 60px;
+  #side{width:424px;flex:0 0 424px;overflow-y:auto;padding:0 14px 60px;
         background:var(--glass);
         -webkit-backdrop-filter:blur(26px) saturate(180%);
         backdrop-filter:blur(26px) saturate(180%);
-        border-right:1px solid var(--gEdge)}
+        }
   #side::-webkit-scrollbar{width:10px}
   #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:5px}
   #side::-webkit-scrollbar-track{background:transparent}
@@ -184,6 +184,12 @@
   .chan div.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
 
   /* ---------- 미리보기 ---------- */
+  #grip{flex:0 0 7px;cursor:col-resize;position:relative;background:transparent;
+        border-right:1px solid var(--gEdge);transition:background .15s}
+  #grip::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+               width:3px;height:46px;border-radius:3px;background:var(--sb);opacity:.55;transition:.15s}
+  #grip:hover::after,#grip.on::after{background:var(--acc);opacity:1;height:70px}
+  body.resizing{cursor:col-resize;user-select:none}
   #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
          padding:16px;gap:10px;min-width:0;background:transparent}
   #cv{max-width:100%;max-height:calc(100vh - 92px);box-shadow:var(--shadow);
@@ -501,6 +507,8 @@
     </div>
   </details>
 </div>
+
+<div id="grip" title="드래그해서 너비 조절 · 더블클릭하면 기본값"></div>
 
 <div id="stage">
   <canvas id="cv"></canvas>
@@ -902,7 +910,9 @@ $("#zoom").oninput = ()=>{
 };
 
 let drag = null;
+let dragMoved = false;
 cv.addEventListener("mousedown", e=>{
+  dragMoved = false;
   if(!imgs[cur]) return;
   const r = cv.getBoundingClientRect(), k = DW/r.width;
   drag = {sx:e.clientX*k, sy:e.clientY*k, ox:imgs[cur].x, oy:imgs[cur].y, k:k};
@@ -910,11 +920,38 @@ cv.addEventListener("mousedown", e=>{
 });
 window.addEventListener("mousemove", e=>{
   if(!drag) return;
+  dragMoved = true;
   imgs[cur].x = drag.ox + (e.clientX*drag.k - drag.sx);
   imgs[cur].y = drag.oy + (e.clientY*drag.k - drag.sy);
   markPhoto(); render();
 });
 window.addEventListener("mouseup", ()=>{ drag = null; cv.classList.remove("drag"); });
+/* 미리보기에서 요소를 누르면 그 메뉴가 열린다 */
+const HIT_ORDER = ["logo","head","colL","colR","issue","mast"];
+function hitBlock(e){
+  const r = cv.getBoundingClientRect(), k = DW/r.width;
+  const x = (e.clientX-r.left)*k, y = (e.clientY-r.top)*k, pad = DW*0.015;
+  for(const key of HIT_ORDER){
+    const b = blocks[key];
+    if(b && b.w > 0 && x >= b.x-pad && x <= b.x+b.w+pad && y >= b.y-pad && y <= b.y+b.h+pad)
+      return key;
+  }
+  return null;
+}
+cv.addEventListener("click", e=>{
+  if(dragMoved) return;
+  const key = hitBlock(e); if(!key) return;
+  const d = document.querySelector('#side details[data-hl="' + key + '"]');
+  if(!d) return;
+  d.open = true;
+  d.scrollIntoView({behavior:"smooth", block:"start"});
+  setHL(key);
+});
+cv.addEventListener("mousemove", e=>{
+  if(drag) return;
+  cv.style.cursor = hitBlock(e) ? "pointer" : "grab";
+});
+
 cv.addEventListener("wheel", e=>{
   const o = imgs[cur]; if(!o) return;
   e.preventDefault();
@@ -1773,6 +1810,44 @@ $("#helpClose").onclick = ()=>openHelp(false);
 helpBg.addEventListener("mousedown", e=>{ if(e.target === helpBg) openHelp(false); });
 window.addEventListener("keydown", e=>{ if(e.key === "Escape") openHelp(false); });
 
+/* ---- 사이드바 너비 조절 ---- */
+const SIDE_MIN = 320, SIDE_MAX = 720, SIDE_DEF = 424;
+function setSideW(px, store){
+  const w = Math.round(Math.min(SIDE_MAX, Math.max(SIDE_MIN, px)));
+  const side = $("#side");
+  side.style.width = w + "px";
+  side.style.flexBasis = w + "px";
+  layout(); render();
+  if(store){ try{ localStorage.setItem("magcover_sidew", w); }catch(e){} }
+}
+/* 기본값 = 헤더(로고 + 제목 + 버튼)가 잘리지 않는 최소 너비 */
+function fitSideToHeader(){
+  const head = $("#head");
+  const h1 = head.querySelector("h1");
+  const right = head.lastElementChild;
+  const need = $("#brand").offsetWidth + 9 + h1.scrollWidth + 10
+             + right.offsetWidth + 28 + 8;
+  setSideW(need, false);
+}
+let sideStored = null;
+try{ sideStored = parseInt(localStorage.getItem("magcover_sidew"), 10); }catch(e){}
+if(sideStored) setSideW(sideStored, false);
+const grip = $("#grip");
+grip.addEventListener("mousedown", e=>{
+  e.preventDefault();
+  grip.classList.add("on"); document.body.classList.add("resizing");
+  const move = ev => setSideW(ev.clientX - $("#side").getBoundingClientRect().left, false);
+  const up = ev => {
+    setSideW(ev.clientX - $("#side").getBoundingClientRect().left, true);
+    grip.classList.remove("on"); document.body.classList.remove("resizing");
+    window.removeEventListener("mousemove", move);
+    window.removeEventListener("mouseup", up);
+  };
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+});
+grip.addEventListener("dblclick", ()=>setSideW(SIDE_DEF, true));
+
 /* ---- 편집 위치 표시 & 섹션별 초기화 ---- */
 let hlBlock = null, hlTimer = null;
 function setHL(k){
@@ -1871,6 +1946,7 @@ async function preloadFonts(){
     jobs.push(document.fonts.load('italic 700 40px ' + fam).catch(()=>{}));
   });
   await Promise.all(jobs);
+  if(!sideStored) fitSideToHeader();
   render(); drawCurve();
 }
 
