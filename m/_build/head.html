@@ -15,18 +15,20 @@
 __FONTLINKS__
 <style>
 __TOKENS__
-  /* 모바일에서만 쓰는 값 — 사진 위에 뜨는 조절판 바탕 */
-  :root{--tray:rgba(255,255,255,.90)}
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--tray:rgba(26,26,35,.90)} }
-  :root[data-theme="dark"]{--tray:rgba(26,26,35,.90)}
+  /* 모바일에서만 쓰는 값 */
+  :root{--card:rgba(255,255,255,.62); --cardTop:rgba(255,255,255,.94)}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --card:rgba(28,28,38,.55); --cardTop:rgba(22,22,31,.94)} }
+  :root[data-theme="dark"]{--card:rgba(28,28,38,.55); --cardTop:rgba(22,22,31,.94)}
 
   *{box-sizing:border-box}
-  html{height:100%}
   html,body{-webkit-text-size-adjust:100%}
-  body{margin:0;height:100%;background:var(--bg);color:var(--tx);
-       font:14px/1.5 "Noto Sans KR","Segoe UI",system-ui,sans-serif;
-       overflow:hidden;overscroll-behavior:none;
-       -webkit-tap-highlight-color:transparent}
+  /* 머리말·미리보기·하단 바는 제자리에 두고 설정만 스크롤한다.
+     (페이지 전체를 스크롤하면 끝에서 마지막 항목이 미리보기에 가린다) */
+  body{margin:0;background:var(--bg);color:var(--tx);
+       font:14px/1.6 "Noto Sans KR","Segoe UI",system-ui,sans-serif;
+       display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;
+       overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
   body::before{
     content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;
     background:
@@ -36,140 +38,105 @@ __TOKENS__
       radial-gradient(42% 42% at 20% 90%, var(--b4) 0%, transparent 60%);
     filter:blur(34px);opacity:.92;
   }
-  #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  /* ---------- 상단 바 ---------- */
-  #head{flex:0 0 auto;display:flex;align-items:center;gap:8px;z-index:7;
-        padding:calc(env(safe-area-inset-top) + 7px) 12px 7px;
-        padding-left:calc(env(safe-area-inset-left) + 12px);
-        padding-right:calc(env(safe-area-inset-right) + 12px);
+  /* ---------- 머리말 (폰 목업 스튜디오와 같은 구성) ---------- */
+  #head{flex:0 0 auto;z-index:30;display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;
+        padding:calc(env(safe-area-inset-top) + 9px) 14px 9px;
         background:var(--glass);
         -webkit-backdrop-filter:blur(26px) saturate(180%);
         backdrop-filter:blur(26px) saturate(180%);
         border-bottom:1px solid var(--line)}
-  #ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
-  #brand{height:18px;width:auto;display:block;max-width:100%;filter:invert(1)}
+  #brand{height:19px;width:auto;display:block;flex:0 0 auto;filter:invert(1)}
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #brand{filter:none} }
   :root[data-theme="dark"] #brand{filter:none}
-  h1{margin:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-     font:500 11.5px/1 "Noto Sans KR",system-ui,sans-serif;
-     letter-spacing:.02em;color:var(--tx2)}
-  button.ic{width:34px;height:34px;flex:0 0 34px;padding:0;border-radius:50%;min-height:0;
-            display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
-  button.ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;
-                stroke-linecap:round;stroke-linejoin:round}
-  button.ic.on{background:var(--acc);color:var(--accTx);border-color:transparent;
-               box-shadow:0 5px 14px rgba(220,63,92,.30)}
+  h1{margin:0;font-size:14.5px;font-weight:700;color:var(--tx);line-height:1.3;
+     padding-left:10px;border-left:1px solid var(--fieldBd);white-space:nowrap}
+  #head p{margin:0;flex:1 0 100%;order:3;color:var(--tx2);font-size:11.5px}
+  #head .ic{margin-left:auto;order:2;width:32px;height:32px;flex:0 0 32px;padding:0;border-radius:50%;
+            min-height:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
 
-  /* ---------- 미리보기 ---------- */
-  #stage{flex:1 1 auto;min-height:0;position:relative;display:flex;
-         align-items:center;justify-content:center;
-         padding:9px 9px calc(var(--trayH, 0px) + 9px)}
+  /* ---------- 본문: 미리보기 + 설정 레일 ---------- */
+  .work{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px;padding:10px 12px 0}
+  .card,#stage,#side{border-radius:18px;background:var(--card);
+       -webkit-backdrop-filter:blur(22px) saturate(180%);
+       backdrop-filter:blur(22px) saturate(180%);
+       border:1px solid var(--gEdge);box-shadow:var(--gShadow)}
+
+  /* 미리보기는 스크롤해도 화면 위에 붙어 있다 */
+  #stage{flex:0 0 auto;background:var(--cardTop);
+         display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 12px 10px}
+  .cvwrap{position:relative;display:flex;align-items:center;justify-content:center;
+          width:100%;height:var(--pvH, 38dvh)}
   #cv{max-width:100%;max-height:100%;display:block;touch-action:none;
       box-shadow:var(--shadow);background:#000;border-radius:5px}
-  #bar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--trayH, 0px) + 6px);
-       display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx2);
-       padding:4px 12px;border-radius:999px;background:var(--glass);
-       -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-       border:1px solid var(--gEdge);pointer-events:none;max-width:92%;
+  #bar{font-size:11px;color:var(--tx2);padding:3px 12px;border-radius:999px;
+       background:var(--glass2);border:1px solid var(--gEdge);max-width:100%;
        white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #empty{position:absolute;top:9px;left:9px;right:9px;bottom:calc(var(--trayH, 0px) + 9px);
-         display:flex;align-items:center;justify-content:center;
-         text-align:center;border:1.5px dashed var(--sb);border-radius:14px;background:var(--glass2)}
+  #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+         text-align:center;border:1.5px dashed var(--sb);border-radius:12px;background:var(--glass2)}
   #empty.off{display:none}
-  #empty .msg{padding:15px 20px;border-radius:15px;color:var(--tx2);font-size:12.5px;line-height:1.6;
+  #empty .msg{padding:13px 16px;border-radius:14px;color:var(--tx2);font-size:12.5px;line-height:1.6;
               background:var(--glass);border:1px solid var(--gEdge);box-shadow:var(--gShadow);
               -webkit-backdrop-filter:blur(16px) saturate(180%);
               backdrop-filter:blur(16px) saturate(180%)}
   #empty b{display:block;font-size:15px;color:var(--tx);margin-bottom:4px}
 
-  /* ---------- 하단 도구바 (라이트룸식) ---------- */
-  #bottom{flex:0 0 auto;z-index:6;position:relative;
-          background:var(--glass);
-          -webkit-backdrop-filter:blur(26px) saturate(180%);
-          backdrop-filter:blur(26px) saturate(180%);
-          border-top:1px solid var(--gEdge);
-          padding-bottom:env(safe-area-inset-bottom)}
-
-  /* 조절판 — 고른 항목의 슬라이더만 사진 위로 올라온다 */
-  #tray{display:none;position:absolute;left:0;right:0;bottom:100%;
-        background:var(--tray);
-        -webkit-backdrop-filter:blur(24px) saturate(180%);
-        backdrop-filter:blur(24px) saturate(180%);
-        border-top:1px solid var(--gEdge);
-        border-radius:18px 18px 0 0;box-shadow:0 -14px 34px rgba(20,20,45,.16)}
-  #tray.on{display:block}
-  #side{max-height:38dvh;overflow-y:auto;overscroll-behavior:contain;
-        padding:0 14px;-webkit-overflow-scrolling:touch}
-  #side::-webkit-scrollbar{width:7px}
-  #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:4px}
-  #side::after{content:"";display:block;height:10px}
-  #side.tall{max-height:48dvh}            /* 곡선처럼 넓게 봐야 하는 항목 */
-
-  .sec{display:none;border:0;border-radius:0;margin:0;background:transparent;overflow:visible}
-  .sec.on{display:block}
-  .sec>summary{position:sticky;top:0;z-index:2;cursor:pointer;list-style:none;user-select:none;
-               display:flex;align-items:center;gap:8px;
-               padding:11px 0 9px;font-weight:700;font-size:13.5px;
-               background:var(--glass);border-bottom:1px solid var(--line)}
-  .sec>summary::-webkit-details-marker{display:none}
-  .sec>summary::after{content:"\2715";color:var(--tx2);font-size:15px;margin-left:10px;padding:0 2px}
-  .sec .body{padding:4px 0 6px;border:0}
-  .sec>summary button{min-height:0;padding:3px 9px;border-radius:8px}
-
-  /* 필름스트립 — 사진 두 장 이상이고 조절판이 접혀 있을 때만 */
-  #film{display:none;gap:6px;overflow-x:auto;padding:8px 12px 0;-webkit-overflow-scrolling:touch}
-  #film.on{display:flex}
-  #tray.on ~ #film{display:none}
-  #thumbs{display:flex;gap:6px}
-  .th{position:relative;flex:0 0 46px;width:46px;aspect-ratio:3/4;border-radius:7px;overflow:hidden;
+  /* 필름스트립 — 미리보기 카드 안쪽 아래 (사진 두 장 이상일 때) */
+  #film{display:none;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #film.on{display:block}
+  #thumbs{display:flex;gap:6px;padding:2px}
+  .th{position:relative;flex:0 0 50px;width:50px;aspect-ratio:3/4;border-radius:8px;overflow:hidden;
       border:2px solid transparent;background:#000}
   .th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
   .th.on{border-color:var(--acc)}
-  .th .x{position:absolute;top:0;right:0;width:17px;height:17px;border-radius:0 0 0 7px;
-         background:#000a;color:#fff;font-size:11px;line-height:17px;text-align:center}
+  .th .x{position:absolute;top:0;right:0;width:18px;height:18px;border-radius:0 0 0 7px;
+         background:#000a;color:#fff;font-size:11px;line-height:18px;text-align:center}
 
-  /* 항목 줄 (지금 단계 안의 메뉴들) */
-  #cats{display:flex;gap:0;overflow-x:auto;padding:7px 6px 3px;
-        scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  #cats::-webkit-scrollbar{display:none}
-  .cat{flex:0 0 auto;min-width:60px;padding:5px 6px;background:none;border:0;box-shadow:none;
-       min-height:0;border-radius:10px;color:var(--tx2);font-size:10.5px;line-height:1.2;
-       display:flex;flex-direction:column;align-items:center;gap:5px}
-  .cat svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;
-           stroke-linecap:round;stroke-linejoin:round}
-  .cat.on{color:var(--acc);font-weight:700;background:var(--fieldH);
-          box-shadow:inset 0 0 0 1px var(--fieldBd)}
-  .cat.on svg{stroke-width:1.9}
+  /* ---------- 설정 레일 (여기만 스크롤) ---------- */
+  #side{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+        -webkit-overflow-scrolling:touch;padding:2px 0 6px;position:relative}
+  #side::-webkit-scrollbar{width:7px}
+  #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:4px}
+  .sec{border:0;border-bottom:1px solid var(--line);border-radius:0;margin:0;background:transparent}
+  .sec:last-of-type{border-bottom:0}
+  .sec>summary{cursor:pointer;padding:15px 16px 12px;font-weight:700;font-size:14px;list-style:none;
+               display:flex;align-items:center;gap:8px;user-select:none}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec>summary::after{content:"\25BE";color:var(--tx2);font-size:11px;margin-left:10px}
+  .sec[open]>summary::after{content:"\25B4"}
+  .sec>summary>button{margin-left:auto;min-height:0;padding:3px 9px;border-radius:8px}
+  .sec .body{padding:0 16px 16px}
 
-  /* 단계 줄 — 사진 → 커버 → 보정 → 내보내기 */
-  #modes{display:flex;gap:5px;padding:5px 10px 7px;border-top:1px solid var(--line)}
-  .mode{flex:1 1 0;min-width:0;padding:7px 0 6px;background:none;border:0;box-shadow:none;
-        min-height:0;border-radius:13px;color:var(--tx2);font-size:10.5px;line-height:1.2;
-        display:flex;flex-direction:column;align-items:center;gap:4px}
-  .mode svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;
-            stroke-linecap:round;stroke-linejoin:round}
-  .mode .n{font-size:10.5px}
-  .mode .s{font-size:9px;opacity:.75}
-  .mode.on{background:var(--acc);color:var(--accTx);font-weight:700}
+  /* ---------- 하단 고정 바 ---------- */
+  .dock{flex:0 0 auto;z-index:40;display:flex;gap:8px;
+        padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+        background:var(--glass);
+        -webkit-backdrop-filter:blur(26px) saturate(180%);
+        backdrop-filter:blur(26px) saturate(180%);
+        border-top:1px solid var(--gEdge)}
+  .dock button{flex:1 1 0;min-height:46px;font-size:14.5px}
 
-  /* ---------- 조절판 안 요소 ---------- */
-  .row{display:flex;align-items:center;gap:9px;margin:11px 0;min-width:0}
-  .row label.k{flex:0 0 74px;font-size:12px;color:var(--tx2);line-height:1.3}
-  .row .grow{flex:1;min-width:0}
+  /* ---------- 설정 요소 (PC 판과 같은 결, 손가락 크기로) ---------- */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:11px 0;min-width:0}
+  .row label.k{flex:0 0 auto;font-size:13px;color:var(--tx2);line-height:1.3}
+  .row .grow{flex:1 1 auto;min-width:0}
+  .row input[type=text],.row select{flex:1 1 auto;min-width:0}
 
-  /* 글꼴 16px — 이보다 작으면 아이폰에서 입력할 때 화면이 확대된다 */
+  /* 글꼴 16px — 이보다 작으면 아이폰이 입력할 때 화면을 확대한다 */
   input[type=text],textarea,select{width:100%;background:var(--field);color:var(--tx);
-      border:1px solid var(--fieldBd);border-radius:10px;padding:9px 11px;font:inherit;font-size:16px;
+      border:1px solid var(--fieldBd);border-radius:10px;padding:10px 11px;font:inherit;font-size:16px;
       box-shadow:var(--fieldSh)}
-  select{appearance:none;-webkit-appearance:none;padding-right:34px;
+  select{appearance:none;-webkit-appearance:none;padding-right:34px;min-height:44px;
       text-overflow:ellipsis;white-space:nowrap;overflow:hidden;
       background-image:var(--chevImg);
       background-repeat:no-repeat;background-position:right 12px center}
+  input[type=text]{min-height:44px}
   input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc);
       box-shadow:0 0 0 3px rgba(220,63,92,.18)}
   input[type=text]::placeholder,textarea::placeholder{color:var(--tx2);opacity:.8}
-  textarea{resize:vertical;min-height:76px;line-height:1.45}
+  textarea{resize:vertical;min-height:76px;line-height:1.45;margin-top:2px}
+
+  /* 슬라이더는 이름·값이 위, 트랙이 아래 한 줄 가득 — 손가락으로 미세 조절하기 좋게 */
   input[type=range]{width:100%;height:30px;margin:0;touch-action:pan-y;
       -webkit-appearance:none;appearance:none;background:transparent}
   input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:var(--sb)}
@@ -178,26 +145,25 @@ __TOKENS__
       box-shadow:0 1px 5px rgba(20,20,45,.28)}
   input[type=range]::-moz-range-track{height:2px;border-radius:2px;background:var(--sb)}
   input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;
-      background:var(--field);border:1.7px solid var(--acc);box-shadow:0 1px 5px rgba(20,20,45,.28)}
-  /* 색온도·색조는 어느 쪽으로 가는지 트랙 색으로 보이게 */
+      background:var(--field);border:1.7px solid var(--acc)}
   #fTmp::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#5b8dd9,#e8c85a)}
   #fTmp::-moz-range-track{height:3px;background:linear-gradient(90deg,#5b8dd9,#e8c85a)}
   #fTint::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#5fbf7a,#d066c4)}
   #fTint::-moz-range-track{height:3px;background:linear-gradient(90deg,#5fbf7a,#d066c4)}
-
   @supports selector(:has(*)){
     .row:has(> input[type=range]){display:grid;grid-template-columns:1fr auto;align-items:center;
         column-gap:8px;margin:5px 0 7px}
-    .row:has(> input[type=range]) > label.k{flex:none;grid-area:1/1;font-size:12.5px;color:var(--tx)}
-    .row:has(> input[type=range]) > .val{flex:none;grid-area:1/2;font-size:12px}
+    .row:has(> input[type=range]) > label.k{grid-area:1/1;font-size:12.5px;color:var(--tx)}
+    .row:has(> input[type=range]) > .val{grid-area:1/2;font-size:12px}
     .row:has(> input[type=range]) > input[type=range]{grid-area:2/1/3/3;width:100%}
   }
-  input[type=color]{width:44px;height:34px;flex:0 0 44px;padding:0;border:1px solid var(--fieldBd);
+  input[type=color]{width:46px;height:36px;flex:0 0 46px;padding:0;border:1px solid var(--fieldBd);
       border-radius:9px;background:var(--field);box-shadow:var(--fieldSh)}
-  .val{flex:0 0 46px;text-align:right;font-size:11px;color:var(--tx2);font-variant-numeric:tabular-nums}
+  .val{flex:0 0 46px;text-align:right;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
 
-  .sw{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-size:13px;padding:4px 0}
-  .sw input{-webkit-appearance:none;appearance:none;position:relative;flex:0 0 40px;
+  .sw{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-size:13px;padding:2px 0;
+      justify-content:flex-end;text-align:right}
+  .sw input{-webkit-appearance:none;appearance:none;position:relative;flex:0 0 40px;order:2;
       width:40px;height:23px;margin:0;border-radius:999px;background:var(--sb);
       border:0;transition:.16s;cursor:pointer}
   .sw input::after{content:"";position:absolute;top:2.5px;left:2.5px;width:18px;height:18px;
@@ -206,18 +172,20 @@ __TOKENS__
   .sw input:checked::after{transform:translateX(17px)}
 
   button{background:var(--field);color:var(--tx);border:1px solid var(--fieldBd);border-radius:11px;
-         padding:10px 13px;font:inherit;font-size:13px;min-height:40px;
+         padding:10px 13px;font:inherit;font-size:13.5px;min-height:44px;
          box-shadow:var(--fieldSh);-webkit-appearance:none}
   button:active{filter:brightness(.94)}
   button.pri{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700;
              box-shadow:0 6px 18px rgba(220,63,92,.30)}
   .btns{display:flex;gap:6px;flex-wrap:wrap}
+  .btns button{flex:1 1 auto}
 
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-  .chip{padding:8px 13px;border:1px solid var(--fieldBd);border-radius:999px;font-size:12.5px;
-        background:var(--field);color:var(--tx);box-shadow:var(--fieldSh)}
+  .chip{flex:1 1 auto;text-align:center;padding:11px 10px;border:1px solid var(--fieldBd);
+        border-radius:10px;font-size:13px;background:var(--field);color:var(--tx);
+        box-shadow:var(--fieldSh);white-space:nowrap}
   .chip.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
-  .hint{font-size:11.5px;color:var(--tx2);line-height:1.6;margin:8px 0 0}
+  .hint{font-size:12px;color:var(--tx2);line-height:1.6;margin:8px 0 0;word-break:keep-all}
 
   #drop{border:1.5px dashed var(--sb);border-radius:13px;padding:16px 10px;text-align:center;
         color:var(--tx2);font-size:13px;background:var(--glass2)}
@@ -226,20 +194,20 @@ __TOKENS__
   #curveWrap{border:1px solid var(--gEdge);border-radius:11px;overflow:hidden;background:var(--graph)}
   #curve{display:block;width:100%;height:190px;touch-action:none}
   .chan{display:flex;gap:5px;margin:9px 0 7px}
-  .chan div{flex:1;text-align:center;padding:9px 0;font-size:12px;border-radius:9px;
+  .chan div{flex:1;text-align:center;padding:10px 0;font-size:12.5px;border-radius:9px;
             border:1px solid var(--fieldBd);background:var(--field);color:var(--tx);
             box-shadow:var(--fieldSh)}
   .chan div.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
 
   #theme{display:flex;border:1px solid var(--fieldBd);border-radius:999px;overflow:hidden;
          background:var(--field);box-shadow:var(--fieldSh)}
-  #theme button{flex:1;border:0;border-radius:0;padding:8px 6px;font-size:12px;background:transparent;
+  #theme button{flex:1;border:0;border-radius:0;padding:9px 6px;font-size:12.5px;background:transparent;
                 color:var(--tx2);min-height:0;box-shadow:none}
   #theme button+button{border-left:1px solid var(--line)}
   #theme button.on{background:var(--acc);color:var(--accTx);font-weight:700}
 
   #toast{position:fixed;left:50%;transform:translateX(-50%);
-         bottom:calc(var(--bh, 130px) + 12px);z-index:40;
+         bottom:calc(80px + env(safe-area-inset-bottom));z-index:41;
          background:var(--glass);color:var(--tx);
          -webkit-backdrop-filter:blur(20px) saturate(180%);
          backdrop-filter:blur(20px) saturate(180%);
@@ -267,7 +235,7 @@ __TOKENS__
   #prog .foot button{border-radius:999px;padding:8px 20px}
 
   /* 완료 알림 */
-  #done{position:fixed;left:10px;right:10px;bottom:calc(var(--bh, 120px) + 10px);z-index:71;
+  #done{position:fixed;left:10px;right:10px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:71;
         display:none;align-items:center;gap:10px;padding:13px 14px;border-radius:13px;
         background:rgba(24,104,72,.96);color:#fff;font-size:13px;
         box-shadow:0 10px 28px rgba(0,0,0,.28)}
@@ -313,11 +281,10 @@ __TOKENS__
   #help b{font-weight:700}
   #help .foot{display:flex;justify-content:flex-end;margin-top:20px}
 
-  /* 화면이 넓으면(태블릿·가로) 조절판 폭만 가운데로 모은다 */
-  @media (min-width:700px){
-    #side{padding:0 max(14px, calc((100% - 660px)/2))}
-    #cats{justify-content:center}
-    #modes{max-width:660px;margin:0 auto}
+  /* 화면이 넓으면(태블릿·가로) 본문 폭만 가운데로 모은다 */
+  @media (min-width:760px){
+    .work{max-width:720px;margin:0 auto;width:100%}
+    .dock{padding-left:calc((100vw - 720px)/2 + 12px);padding-right:calc((100vw - 720px)/2 + 12px)}
   }
 </style>
 </head>

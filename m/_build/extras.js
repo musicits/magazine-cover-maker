@@ -11,154 +11,36 @@
      아래④  단계 줄 — 사진 → 커버 → 보정 → 내보내기
    ========================================================================= */
 
-/* ---------------- 아이콘 ---------------- */
-const IC = {
-  photo:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.4"/><path d="M4 17l4.5-4 3 2.5L15 12l5 5"/>',
-  ratio:'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 9h16"/>',
-  mast: '<path d="M4 7.5V5h16v2.5M12 5v14M8.5 19h7"/>',
-  overlay:'<path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M4 12.5L12 17l8-4.5"/>',
-  issue:'<path d="M4.5 9h15M4.5 15h15M10 4l-2 16M17 4l-2 16"/>',
-  colL: '<path d="M4 6h11M4 10h16M4 14h11M4 18h8"/>',
-  colR: '<path d="M9 6h11M4 10h16M9 14h11M12 18h8"/>',
-  head: '<path d="M5 19V5h5a3.5 3.5 0 010 7H5m0 0h6a3.5 3.5 0 010 7H5z"/>',
-  body: '<path d="M4 5v14M7.5 5v14M11 5v14M14 5v10M17 5v14M20 5v14"/>',
-  light:'<circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>',
-  color:'<path d="M12 3.2s6.2 6.6 6.2 10.4A6.2 6.2 0 015.8 13.6C5.8 9.8 12 3.2 12 3.2z"/>',
-  filter:'<path d="M3.5 5h17v2.6l-6.3 6.3V19l-4.4 2.2v-7.3L3.5 7.6z"/>',
-  curve:'<path d="M4 20V4M4 20h16"/><path d="M4.5 16.5c6.5 0 8-11 15-13"/>',
-  grain:'<circle cx="7" cy="8" r=".9"/><circle cx="12.5" cy="6" r=".9"/><circle cx="17.5" cy="9.5" r=".9"/><circle cx="6.5" cy="14.5" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="17" cy="16" r=".9"/><circle cx="10" cy="18" r=".9"/>',
-  logo: '<path d="M4 16.5c4-.5 5.5-9.5 8.5-9.5S15 14 20 12.5"/><path d="M4 20h16"/>',
-  export:'<path d="M12 4v11M8 11l4 4 4-4M5 20h14"/>',
-  cover:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7.5h8M8 11h5"/>',
-  tone: '<path d="M4 8h8M16.5 8H20M4 16h3.5M12 16h8"/><circle cx="14.2" cy="8" r="2.2"/><circle cx="9.7" cy="16" r="2.2"/>'
-};
-const svg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + IC[k] + '</svg>';
+/* ---------------- 화면 크기 ----------------
+   머리말 높이와 미리보기 높이를 CSS 에 알려준다. 미리보기 카드는 스크롤해도
+   화면 위에 붙어 있으므로(sticky) 높이가 고정이어야 덜컹거리지 않는다. */
+const sideEl = $("#side"), stageEl = $("#stage");
+const secs = Array.from(document.querySelectorAll("#side details.sec"));
 
-/* ---------------- 단계와 항목 ----------------
-   i = PC 판 메뉴 차례 (1.사진 … 14.내보내기). 줄에 놓는 순서는 이 배열 순서. */
-const MODES = [
-  {key:"photo",  name:"사진",   sub:"고르기",  icon:"photo"},
-  {key:"cover",  name:"커버",   sub:"조판",    icon:"cover"},
-  {key:"tone",   name:"보정",   sub:"빛·색",   icon:"tone"},
-  {key:"export", name:"내보내기", sub:"저장",   icon:"export"}
-];
-const CATS = [
-  {i:0,  m:"photo",  label:"사진 넣기", icon:"photo"},
-  {i:1,  m:"photo",  label:"판형",     icon:"ratio"},
-
-  {i:2,  m:"cover",  label:"제호",     icon:"mast"},
-  {i:4,  m:"cover",  label:"발행 정보", icon:"issue"},
-  {i:5,  m:"cover",  label:"커버라인 왼쪽", icon:"colL"},
-  {i:6,  m:"cover",  label:"커버라인 오른쪽", icon:"colR"},
-  {i:7,  m:"cover",  label:"헤드라인",  icon:"head"},
-  {i:8,  m:"cover",  label:"서체·바코드", icon:"body"},
-  {i:3,  m:"cover",  label:"로고 앞으로", icon:"overlay"},
-  {i:14, m:"cover",  label:"서명",     icon:"logo"},
-
-  {i:9,  m:"tone",   label:"빛",       icon:"light"},
-  {i:10, m:"tone",   label:"색",       icon:"color"},
-  {i:11, m:"tone",   label:"필터",     icon:"filter"},
-  {i:12, m:"tone",   label:"곡선",     icon:"curve"},
-  {i:13, m:"tone",   label:"질감",     icon:"grain"},
-
-  {i:15, m:"export", label:"내보내기",  icon:"export"}
-];
-/* 짧은 이름 — 항목 줄에는 좁게 들어가야 한다 */
-const SHORT = {"사진 넣기":"넣기","발행 정보":"발행","커버라인 왼쪽":"왼쪽","커버라인 오른쪽":"오른쪽",
-               "서체·바코드":"서체","로고 앞으로":"로고앞","내보내기":"저장"};
-
-const secs   = Array.from(document.querySelectorAll("#side details.sec"));
-const trayEl = $("#tray"), sideEl = $("#side"), catsEl = $("#cats"),
-      modesEl = $("#modes"), filmEl = $("#film"), bottomEl = $("#bottom");
-let mode = "photo", openCat = -1;
-
-/* 다시 그리기는 한 프레임에 한 번만 */
 let layoutPending = false;
 function relayout(){
   if(layoutPending) return;
   layoutPending = true;
   requestAnimationFrame(()=>{
     layoutPending = false;
-    /* 조절판이 덮는 높이 — 미리보기는 그 위 공간에 맞춰 커진다 */
-    document.documentElement.style.setProperty("--trayH",
-      (trayEl.classList.contains("on") ? trayEl.offsetHeight : 0) + "px");
+    const root = document.documentElement.style;
+    root.setProperty("--hh", $("#head").offsetHeight + "px");
+    /* 미리보기 = 화면의 38% (최소 190px), 나머지는 설정 레일 몫 */
+    const h = Math.max(190, Math.round(window.innerHeight * 0.38));
+    root.setProperty("--pvH", h + "px");
     layout(); render();
-    /* 곡선판은 숨어 있는 동안 크기를 잴 수 없다 — 보일 때 다시 그린다 */
-    if(secs[12] && secs[12].classList.contains("on")) drawCurve();
-    document.documentElement.style.setProperty("--bh", bottomEl.offsetHeight + "px");
   });
 }
 window.addEventListener("resize", relayout);
+window.addEventListener("orientationchange", ()=>setTimeout(relayout, 250));
 if(window.visualViewport) window.visualViewport.addEventListener("resize", relayout);
 
-/* ---------------- 단계 줄 ---------------- */
-MODES.forEach(m=>{
-  const b = document.createElement("button");
-  b.className = "mode"; b.dataset.m = m.key;
-  b.innerHTML = svg(m.icon) + '<span class="n">' + m.name + '</span>';
-  b.onclick = ()=>setMode(m.key);
-  modesEl.appendChild(b);
-});
-function setMode(k, keepCat){
-  mode = k;
-  Array.from(modesEl.children).forEach(b=>b.classList.toggle("on", b.dataset.m === k));
-  buildCats();
-  if(!keepCat){
-    /* 내보내기는 항목이 하나뿐이라 바로 펼친다 */
-    if(k === "export") showCat(15); else closeTray();
-  }
-  try{ localStorage.setItem("magcover_m_mode", k); }catch(e){}
-}
-
-/* ---------------- 항목 줄 ---------------- */
-function buildCats(){
-  catsEl.innerHTML = "";
-  CATS.filter(c=>c.m === mode).forEach(c=>{
-    const b = document.createElement("button");
-    b.className = "cat" + (c.i === openCat ? " on" : "");
-    b.dataset.i = c.i;
-    b.innerHTML = svg(c.icon) + "<span>" + (SHORT[c.label] || c.label) + "</span>";
-    b.onclick = ()=>{ (c.i === openCat) ? closeTray() : showCat(c.i); };
-    catsEl.appendChild(b);
-  });
-}
-function markCats(){
-  Array.from(catsEl.children).forEach(b=>b.classList.toggle("on", +b.dataset.i === openCat));
-  const on = catsEl.querySelector(".cat.on");
-  if(on) catsEl.scrollTo({left: on.offsetLeft - 70, behavior:"smooth"});
-}
-function showCat(i){
-  const d = secs[i]; if(!d) return;
-  openCat = i;
-  secs.forEach((x, j)=>{ x.classList.toggle("on", j === i); x.open = (j === i); });
-  trayEl.classList.add("on");
-  sideEl.classList.toggle("tall", d.dataset.hl === "curve");   /* 곡선은 넓게 */
-  markCats();
-  sideEl.scrollTop = 0;
-  relayout();
-}
-function closeTray(){
-  openCat = -1;
-  trayEl.classList.remove("on");
-  secs.forEach(x=>x.classList.remove("on"));
-  markCats();
-  relayout();
-}
-/* 조절판 머리글(제목·↺·✕)을 누르면 접는다 — 열고 닫기는 항목 줄이 맡는다 */
-secs.forEach((d, i)=>{
-  const sm = d.querySelector("summary");
-  const c = CATS.find(x=>x.i === i);
-  if(c && sm.firstChild && sm.firstChild.nodeType === 3) sm.firstChild.nodeValue = c.label;
-  sm.addEventListener("click", e=>{ e.preventDefault(); closeTray(); });
-});
-/* 미리보기에서 요소를 누르면 그 항목이 열린다 (엔진의 탭 판정이 부른다) */
+/* 미리보기에서 요소를 누르면 그 항목으로 데려간다 (엔진의 탭 판정이 부른다) */
 function openSection(key){
   const d = document.querySelector('#side details[data-hl="' + key + '"]');
   if(!d) return;
-  const i = secs.indexOf(d);
-  const c = CATS.find(x=>x.i === i); if(!c) return;
-  if(c.m !== mode) setMode(c.m, true);
-  showCat(i);
+  d.open = true;
+  sideEl.scrollTo({top: Math.max(0, d.offsetTop - 4), behavior:"smooth"});
 }
 
 /* ---------------- 미리보기 손가락 조작 ----------------
@@ -306,14 +188,12 @@ async function rescueImage(f){
 
 /* ---------------- 화면 상태 갱신 (엔진의 render() 에 얹는다) ---------------- */
 const _render = render;
-let filmOn = null;
 render = function(){
   _render();
   const n = imgs.length;
   $("#empty").classList.toggle("off", n > 0);
   $("#bar").style.display = n ? "" : "none";
-  const want = n > 1;
-  if(want !== filmOn){ filmOn = want; filmEl.classList.toggle("on", want); relayout(); }
+  $("#film").classList.toggle("on", n > 1);
 };
 
 /* ---------------- 저장 진행창 · 완료 알림 ---------------- */
@@ -402,13 +282,12 @@ async function shareCover(){
     done("공유를 지원하지 않아 파일로 저장했습니다");
   }
 }
-$("#share").onclick     = shareCover;
-$("#topShare").onclick  = shareCover;
-$("#topSave").onclick   = ()=>$("#save").click();
+$("#share").onclick    = shareCover;
+$("#dockPick").onclick = ()=>openPick();
+/* 하단 바의 [저장] 은 공유창을 먼저 띄운다 — 사진 앨범에 바로 넣는 길이 제일 짧다 */
+$("#dockSave").onclick = shareCover;
 
 /* ---------------- 시작 상태 ---------------- */
-let startMode = "photo";
-try{ startMode = localStorage.getItem("magcover_m_mode") || "photo"; }catch(e){}
-if(!MODES.some(m=>m.key === startMode)) startMode = "photo";
-setMode(startMode);
-render(); drawCurve(); relayout();
+secs.forEach(d=>{ d.open = true; });     /* 폰 목업 스튜디오처럼 모두 펼쳐 둔다 (머리글을 누르면 접힘) */
+relayout();
+render(); drawCurve();
