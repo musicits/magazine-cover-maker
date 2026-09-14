@@ -30,7 +30,7 @@ def rep(text, old, new, n=1):
 fontlinks = cut(src, '<link href="https://fonts.googleapis.com/css2?family=Bodoni',
                      '<style>').rstrip()
 tokens    = cut(src, '  /* ===== 기본(라이트)', '  *{box-sizing:border-box}')
-sections  = cut(src, '  <details class="sec" open>', '\n</div>\n\n<div id="grip"')
+sections  = cut(src, '  <details class="sec" open>', '\n</aside>\n</main>')
 helpmodal = cut(src, '<div id="helpBg">', '<script>')
 js        = cut(src, '<script>\n', '</script>')[len('<script>\n'):]
 
@@ -38,12 +38,13 @@ js        = cut(src, '<script>\n', '</script>')[len('<script>\n'):]
 js = rep(js, "const PV = 2;",
     "const PV = (Math.min(screen.width, screen.height) > 520) ? 1.5 : 1;   /* 모바일 — 미리보기를 가볍게 */")
 
-js = rep(js,
-    '  const s = Math.min(($("#stage").clientWidth - 32)/DW, (window.innerHeight - 92)/DH);',
-    '  const st = $("#stage");\n'
-    '  const cs = getComputedStyle(st);\n'
-    '  const av = st.clientHeight - (parseFloat(cs.paddingTop)||0) - (parseFloat(cs.paddingBottom)||0);\n'
-    '  const s = Math.max(0.02, Math.min((st.clientWidth - 18)/DW, (av - 4)/DH));')
+pc_layout = '''  const st = $("#stage"), cs = getComputedStyle(st);
+  const availW = st.clientWidth - (parseFloat(cs.paddingLeft)||0) - (parseFloat(cs.paddingRight)||0);
+  const availH = window.innerHeight - ($("#head").offsetHeight || 60) - 118;
+  const s = Math.max(0.02, Math.min(availW/DW, availH/DH));'''
+js = rep(js, pc_layout,
+    '  const box = document.querySelector(".cvwrap");\n'
+    '  const s = Math.max(0.02, Math.min(box.clientWidth/DW, box.clientHeight/DH));')
 
 drag_old = '''let drag = null;
 cv.addEventListener("mousedown", e=>{
@@ -132,17 +133,17 @@ cvC.addEventListener("pointerup", curveEnd);
 cvC.addEventListener("pointercancel", curveEnd);'''
 js = rep(js, curve_old, curve_new)
 
-side_old = cut(js, '/* ---- 사이드바 너비 조절 ---- */',
-                   'grip.addEventListener("dblclick", ()=>setSideW(SIDE_DEF, true));', inc_b=True)
-js = rep(js, side_old, '/* (PC 의 사이드바 너비 조절은 모바일에 없다) */')
-js = rep(js, '  if(!sideStored) fitSideToHeader();\n', '')
-
 # 저장 안내 문구도 모바일 표현으로
 js = rep(js, '"투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다. 없으면 타원 영역으로 동작합니다."',
              '"투명 배경 PNG를 원본과 같은 크기로 저장해 넣으면 위치가 자동으로 맞습니다. 없으면 타원 영역으로 동작합니다."')
 
 js = rep(js, 'if(el.id === "zoom" || el.id === "file") return;',
              'if(el.id === "zoom" || el.type === "file") return;')
+
+# PC 판의 레일 너비 조절·머리말 높이는 모바일에 없다
+side_old = cut(js, '/* ---- 설정 레일 너비 조절 ---- *',
+                   'window.addEventListener("resize", headH);', inc_b=True)
+js = rep(js, side_old, 'function headH(){}   /* (PC 의 레일 너비 조절은 모바일에 없다) */')
 
 js = rep(js, '  if(!files.length) return;',
              '  if(!files.length){ toast("사진 파일이 아닙니다"); return; }')
@@ -191,7 +192,7 @@ sections = rep(sections,
 sections = rep(sections,
   '<div class="hint">캔버스에서 <b>드래그</b>하면 위치 이동, <b>휠</b>은 확대/축소.</div>',
   '<div class="hint">미리보기에서 <b>한 손가락</b>으로 끌면 위치 이동, <b>두 손가락</b>을 벌리면 확대·축소.<br>'
-  '미리보기의 제호·문구를 <b>톡</b> 치면 그 항목의 조절판이 바로 열립니다.</div>')
+  '미리보기의 제호·문구를 <b>톡</b> 치면 그 항목으로 바로 내려갑니다.</div>')
 
 sections = rep(sections,
   '<div class="hint">빈 곳을 <b>클릭</b>하면 점 추가, <b>드래그</b>로 이동, <b>더블클릭</b>으로 삭제. 뒤 그래프는 현재 사진의 히스토그램입니다.</div>',
@@ -218,30 +219,30 @@ helpmodal = rep(helpmodal,
   '<div class="sub">사진을 넣으면 바로 커버가 됩니다. 저장 전까지 아무것도 서버로 올라가지 않습니다.</div>',
   '<div class="sub">휴대폰용입니다. 사진을 넣으면 바로 커버가 되고, 아무것도 서버로 올라가지 않습니다.</div>')
 helpmodal = rep(helpmodal,
-  '<li>왼쪽 <b>점선 상자</b>에 사진을 끌어다 놓거나 클릭해서 고릅니다. 여러 장 한꺼번에 됩니다.</li>',
-  '<li><b>사진</b> 단계에서 <b>넣기</b> 를 누르면 앨범·카메라·파일(구글 드라이브)에서 고를 수 있습니다. 여러 장 한꺼번에 됩니다.</li>')
+  '<li>오른쪽 설정판 <b>1. 사진</b>의 점선 상자에 끌어다 놓거나 눌러서 고릅니다. 화면 어디에 끌어다 놓아도 됩니다. 여러 장 한꺼번에 됩니다.</li>',
+  '<li>맨 아래 <b>[사진 선택]</b> 을 누르면 앨범·카메라·파일(구글 드라이브) 중에서 고를 수 있습니다. 여러 장 한꺼번에 됩니다.</li>')
 helpmodal = rep(helpmodal,
   '<li>미리보기에서 <b>드래그</b>하면 사진 위치, <b>마우스 휠</b>은 확대·축소입니다.</li>',
   '<li>미리보기에서 <b>한 손가락</b>으로 끌면 사진 위치, <b>두 손가락</b>을 벌리면 확대·축소입니다.</li>')
 helpmodal = rep(helpmodal,
   '<li>썸네일을 누르면 사진이 바뀌고, 오른쪽 위 <b>×</b>로 뺍니다. 설정은 그대로 유지됩니다.</li>',
-  '<li>사진이 여러 장이면 도구바의 <b>작은 사진 줄</b> 에서 눌러 넘깁니다. <b>×</b> 로 뺍니다. 설정은 그대로 유지됩니다.</li>')
+  '<li>사진이 여러 장이면 미리보기 아래 <b>작은 사진 줄</b> 에서 눌러 넘깁니다. <b>×</b> 로 뺍니다. 설정은 그대로 유지됩니다.</li>')
 helpmodal = rep(helpmodal,
   '<li><b>3. 제호</b>의 매거진 목록에서 고르면 제호 서체·자간뿐 아니라 <b>그 잡지가 실제로 문구를 놓는 자리</b>까지 예시로 채워집니다.</li>',
-  '<li><b>커버</b> 단계 → <b>제호</b> 의 매거진 목록에서 고르면 제호 서체·자간뿐 아니라 <b>그 잡지가 실제로 문구를 놓는 자리</b>까지 예시로 채워집니다.</li>')
+  '<li><b>3. 제호</b> 의 매거진 목록에서 고르면 제호 서체·자간뿐 아니라 <b>그 잡지가 실제로 문구를 놓는 자리</b>까지 예시로 채워집니다.</li>')
 helpmodal = rep(helpmodal,
   '<li><b>11. 곡선</b> — 뒤에 보이는 산 모양이 이 사진의 히스토그램입니다. 선을 <b>클릭</b>해 점을 추가하고 <b>드래그</b>로 옮깁니다. <b>더블클릭</b>하면 점이 지워집니다. RGB / R / G / B 채널을 따로 만질 수 있습니다.</li>',
   '<li><b>곡선</b> — 뒤에 보이는 산 모양이 이 사진의 히스토그램입니다. 빈 곳을 <b>톡</b> 쳐 점을 추가하고 <b>끌어서</b> 옮깁니다. 같은 점을 <b>두 번 톡톡</b> 치면 지워집니다.</li>')
 helpmodal = rep(helpmodal,
   '<li><b>이 커버 PNG 저장</b>은 지금 보이는 한 장, <b>전체 사진 일괄 저장</b>은 넣어둔 사진 전부를 같은 디자인으로 내보냅니다.</li>',
-  '<li>오른쪽 위 <b>저장</b>은 파일로 내려받고, <b>공유</b>는 휴대폰 공유창을 띄워 사진 앨범·카톡으로 바로 보냅니다.</li>')
+  '<li>맨 아래 <b>[저장]</b> 은 공유창을 띄워 사진 앨범·카톡으로 바로 보냅니다. 파일로 내려받으려면 <b>14. 내보내기</b> 의 <b>이 커버 PNG 저장</b> 을 쓰세요.</li>')
 helpmodal = helpmodal.replace('<h3>1 · 사진 넣기</h3>',
   '<h3>0 · 화면 보는 법</h3>\n'
-  '    <p>사진 편집 앱과 같은 짜임새입니다. 위는 미리보기, 아래는 도구바예요.</p>\n    <ul>\n'
-  '      <li>맨 아래 줄이 <b>단계</b> 입니다 — <b>사진</b> 으로 고르고, <b>커버</b> 로 조판하고, <b>보정</b> 으로 색을 만지고, <b>내보내기</b> 로 저장합니다.</li>\n'
-  '      <li>그 위 줄은 지금 단계의 <b>항목</b> 입니다. 누르면 그 항목의 조절판만 올라옵니다. 한 번 더 누르면 접혀서 미리보기가 다시 커집니다.</li>\n'
-  '      <li>사진이 두 장 이상이면 항목 줄 위에 <b>작은 사진 줄</b> 이 생깁니다. 눌러서 사진을 바꾸고 <b>×</b> 로 뺍니다. 커버 설정은 그대로 유지돼요.</li>\n'
-  '      <li>오른쪽 위 <b>저장</b> · <b>공유</b> 는 어느 단계에서든 바로 쓸 수 있습니다.</li>\n'
+  '    <p>위는 미리보기, 아래는 설정입니다. 폰 목업 스튜디오와 같은 짜임새예요.</p>\n    <ul>\n'
+  '      <li><b>미리보기는 화면 위에 붙어 있습니다.</b> 아래로 설정을 넘겨도 커버가 계속 보이니, 슬라이더를 만지면서 바로 확인할 수 있어요.</li>\n'
+  '      <li>설정은 <b>1. 사진</b> 부터 <b>14. 내보내기</b> 까지 차례로 있습니다. 제목 줄을 누르면 접혀서 건너뛰기 좋습니다.</li>\n'
+  '      <li>사진이 두 장 이상이면 미리보기 아래에 <b>작은 사진 줄</b> 이 생깁니다. 눌러서 사진을 바꾸고 <b>×</b> 로 뺍니다. 커버 설정은 그대로 유지돼요.</li>\n'
+  '      <li>맨 아래 <b>[사진 선택]</b> 과 <b>[저장]</b> 은 어디서든 바로 쓸 수 있습니다. <b>[저장]</b> 은 휴대폰 공유창을 띄워 사진 앨범으로 바로 보냅니다.</li>\n'
   '    </ul>\n\n    <h3>1 · 사진 넣기</h3>')
 
 helpmodal = rep(helpmodal,

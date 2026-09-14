@@ -65,18 +65,20 @@
     --b1:#4d1f35; --b2:#15305f; --b3:#4b2a12; --b4:#2b1f54;
   }
 
-  /* 모바일에서만 쓰는 값 — 사진 위에 뜨는 조절판 바탕 */
-  :root{--tray:rgba(255,255,255,.90)}
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--tray:rgba(26,26,35,.90)} }
-  :root[data-theme="dark"]{--tray:rgba(26,26,35,.90)}
+  /* 모바일에서만 쓰는 값 */
+  :root{--card:rgba(255,255,255,.62); --cardTop:rgba(255,255,255,.94)}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --card:rgba(28,28,38,.55); --cardTop:rgba(22,22,31,.94)} }
+  :root[data-theme="dark"]{--card:rgba(28,28,38,.55); --cardTop:rgba(22,22,31,.94)}
 
   *{box-sizing:border-box}
-  html{height:100%}
   html,body{-webkit-text-size-adjust:100%}
-  body{margin:0;height:100%;background:var(--bg);color:var(--tx);
-       font:14px/1.5 "Noto Sans KR","Segoe UI",system-ui,sans-serif;
-       overflow:hidden;overscroll-behavior:none;
-       -webkit-tap-highlight-color:transparent}
+  /* 머리말·미리보기·하단 바는 제자리에 두고 설정만 스크롤한다.
+     (페이지 전체를 스크롤하면 끝에서 마지막 항목이 미리보기에 가린다) */
+  body{margin:0;background:var(--bg);color:var(--tx);
+       font:14px/1.6 "Noto Sans KR","Segoe UI",system-ui,sans-serif;
+       display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;
+       overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
   body::before{
     content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;
     background:
@@ -86,140 +88,105 @@
       radial-gradient(42% 42% at 20% 90%, var(--b4) 0%, transparent 60%);
     filter:blur(34px);opacity:.92;
   }
-  #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  /* ---------- 상단 바 ---------- */
-  #head{flex:0 0 auto;display:flex;align-items:center;gap:8px;z-index:7;
-        padding:calc(env(safe-area-inset-top) + 7px) 12px 7px;
-        padding-left:calc(env(safe-area-inset-left) + 12px);
-        padding-right:calc(env(safe-area-inset-right) + 12px);
+  /* ---------- 머리말 (폰 목업 스튜디오와 같은 구성) ---------- */
+  #head{flex:0 0 auto;z-index:30;display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;
+        padding:calc(env(safe-area-inset-top) + 9px) 14px 9px;
         background:var(--glass);
         -webkit-backdrop-filter:blur(26px) saturate(180%);
         backdrop-filter:blur(26px) saturate(180%);
         border-bottom:1px solid var(--line)}
-  #ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
-  #brand{height:18px;width:auto;display:block;max-width:100%;filter:invert(1)}
+  #brand{height:19px;width:auto;display:block;flex:0 0 auto;filter:invert(1)}
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #brand{filter:none} }
   :root[data-theme="dark"] #brand{filter:none}
-  h1{margin:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-     font:500 11.5px/1 "Noto Sans KR",system-ui,sans-serif;
-     letter-spacing:.02em;color:var(--tx2)}
-  button.ic{width:34px;height:34px;flex:0 0 34px;padding:0;border-radius:50%;min-height:0;
-            display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
-  button.ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;
-                stroke-linecap:round;stroke-linejoin:round}
-  button.ic.on{background:var(--acc);color:var(--accTx);border-color:transparent;
-               box-shadow:0 5px 14px rgba(220,63,92,.30)}
+  h1{margin:0;font-size:14.5px;font-weight:700;color:var(--tx);line-height:1.3;
+     padding-left:10px;border-left:1px solid var(--fieldBd);white-space:nowrap}
+  #head p{margin:0;flex:1 0 100%;order:3;color:var(--tx2);font-size:11.5px}
+  #head .ic{margin-left:auto;order:2;width:32px;height:32px;flex:0 0 32px;padding:0;border-radius:50%;
+            min-height:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
 
-  /* ---------- 미리보기 ---------- */
-  #stage{flex:1 1 auto;min-height:0;position:relative;display:flex;
-         align-items:center;justify-content:center;
-         padding:9px 9px calc(var(--trayH, 0px) + 9px)}
+  /* ---------- 본문: 미리보기 + 설정 레일 ---------- */
+  .work{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px;padding:10px 12px 0}
+  .card,#stage,#side{border-radius:18px;background:var(--card);
+       -webkit-backdrop-filter:blur(22px) saturate(180%);
+       backdrop-filter:blur(22px) saturate(180%);
+       border:1px solid var(--gEdge);box-shadow:var(--gShadow)}
+
+  /* 미리보기는 스크롤해도 화면 위에 붙어 있다 */
+  #stage{flex:0 0 auto;background:var(--cardTop);
+         display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 12px 10px}
+  .cvwrap{position:relative;display:flex;align-items:center;justify-content:center;
+          width:100%;height:var(--pvH, 38dvh)}
   #cv{max-width:100%;max-height:100%;display:block;touch-action:none;
       box-shadow:var(--shadow);background:#000;border-radius:5px}
-  #bar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--trayH, 0px) + 6px);
-       display:flex;gap:8px;align-items:center;font-size:11px;color:var(--tx2);
-       padding:4px 12px;border-radius:999px;background:var(--glass);
-       -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-       border:1px solid var(--gEdge);pointer-events:none;max-width:92%;
+  #bar{font-size:11px;color:var(--tx2);padding:3px 12px;border-radius:999px;
+       background:var(--glass2);border:1px solid var(--gEdge);max-width:100%;
        white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #empty{position:absolute;top:9px;left:9px;right:9px;bottom:calc(var(--trayH, 0px) + 9px);
-         display:flex;align-items:center;justify-content:center;
-         text-align:center;border:1.5px dashed var(--sb);border-radius:14px;background:var(--glass2)}
+  #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+         text-align:center;border:1.5px dashed var(--sb);border-radius:12px;background:var(--glass2)}
   #empty.off{display:none}
-  #empty .msg{padding:15px 20px;border-radius:15px;color:var(--tx2);font-size:12.5px;line-height:1.6;
+  #empty .msg{padding:13px 16px;border-radius:14px;color:var(--tx2);font-size:12.5px;line-height:1.6;
               background:var(--glass);border:1px solid var(--gEdge);box-shadow:var(--gShadow);
               -webkit-backdrop-filter:blur(16px) saturate(180%);
               backdrop-filter:blur(16px) saturate(180%)}
   #empty b{display:block;font-size:15px;color:var(--tx);margin-bottom:4px}
 
-  /* ---------- 하단 도구바 (라이트룸식) ---------- */
-  #bottom{flex:0 0 auto;z-index:6;position:relative;
-          background:var(--glass);
-          -webkit-backdrop-filter:blur(26px) saturate(180%);
-          backdrop-filter:blur(26px) saturate(180%);
-          border-top:1px solid var(--gEdge);
-          padding-bottom:env(safe-area-inset-bottom)}
-
-  /* 조절판 — 고른 항목의 슬라이더만 사진 위로 올라온다 */
-  #tray{display:none;position:absolute;left:0;right:0;bottom:100%;
-        background:var(--tray);
-        -webkit-backdrop-filter:blur(24px) saturate(180%);
-        backdrop-filter:blur(24px) saturate(180%);
-        border-top:1px solid var(--gEdge);
-        border-radius:18px 18px 0 0;box-shadow:0 -14px 34px rgba(20,20,45,.16)}
-  #tray.on{display:block}
-  #side{max-height:38dvh;overflow-y:auto;overscroll-behavior:contain;
-        padding:0 14px;-webkit-overflow-scrolling:touch}
-  #side::-webkit-scrollbar{width:7px}
-  #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:4px}
-  #side::after{content:"";display:block;height:10px}
-  #side.tall{max-height:48dvh}            /* 곡선처럼 넓게 봐야 하는 항목 */
-
-  .sec{display:none;border:0;border-radius:0;margin:0;background:transparent;overflow:visible}
-  .sec.on{display:block}
-  .sec>summary{position:sticky;top:0;z-index:2;cursor:pointer;list-style:none;user-select:none;
-               display:flex;align-items:center;gap:8px;
-               padding:11px 0 9px;font-weight:700;font-size:13.5px;
-               background:var(--glass);border-bottom:1px solid var(--line)}
-  .sec>summary::-webkit-details-marker{display:none}
-  .sec>summary::after{content:"\2715";color:var(--tx2);font-size:15px;margin-left:10px;padding:0 2px}
-  .sec .body{padding:4px 0 6px;border:0}
-  .sec>summary button{min-height:0;padding:3px 9px;border-radius:8px}
-
-  /* 필름스트립 — 사진 두 장 이상이고 조절판이 접혀 있을 때만 */
-  #film{display:none;gap:6px;overflow-x:auto;padding:8px 12px 0;-webkit-overflow-scrolling:touch}
-  #film.on{display:flex}
-  #tray.on ~ #film{display:none}
-  #thumbs{display:flex;gap:6px}
-  .th{position:relative;flex:0 0 46px;width:46px;aspect-ratio:3/4;border-radius:7px;overflow:hidden;
+  /* 필름스트립 — 미리보기 카드 안쪽 아래 (사진 두 장 이상일 때) */
+  #film{display:none;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #film.on{display:block}
+  #thumbs{display:flex;gap:6px;padding:2px}
+  .th{position:relative;flex:0 0 50px;width:50px;aspect-ratio:3/4;border-radius:8px;overflow:hidden;
       border:2px solid transparent;background:#000}
   .th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
   .th.on{border-color:var(--acc)}
-  .th .x{position:absolute;top:0;right:0;width:17px;height:17px;border-radius:0 0 0 7px;
-         background:#000a;color:#fff;font-size:11px;line-height:17px;text-align:center}
+  .th .x{position:absolute;top:0;right:0;width:18px;height:18px;border-radius:0 0 0 7px;
+         background:#000a;color:#fff;font-size:11px;line-height:18px;text-align:center}
 
-  /* 항목 줄 (지금 단계 안의 메뉴들) */
-  #cats{display:flex;gap:0;overflow-x:auto;padding:7px 6px 3px;
-        scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  #cats::-webkit-scrollbar{display:none}
-  .cat{flex:0 0 auto;min-width:60px;padding:5px 6px;background:none;border:0;box-shadow:none;
-       min-height:0;border-radius:10px;color:var(--tx2);font-size:10.5px;line-height:1.2;
-       display:flex;flex-direction:column;align-items:center;gap:5px}
-  .cat svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;
-           stroke-linecap:round;stroke-linejoin:round}
-  .cat.on{color:var(--acc);font-weight:700;background:var(--fieldH);
-          box-shadow:inset 0 0 0 1px var(--fieldBd)}
-  .cat.on svg{stroke-width:1.9}
+  /* ---------- 설정 레일 (여기만 스크롤) ---------- */
+  #side{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+        -webkit-overflow-scrolling:touch;padding:2px 0 6px;position:relative}
+  #side::-webkit-scrollbar{width:7px}
+  #side::-webkit-scrollbar-thumb{background:var(--sb);border-radius:4px}
+  .sec{border:0;border-bottom:1px solid var(--line);border-radius:0;margin:0;background:transparent}
+  .sec:last-of-type{border-bottom:0}
+  .sec>summary{cursor:pointer;padding:15px 16px 12px;font-weight:700;font-size:14px;list-style:none;
+               display:flex;align-items:center;gap:8px;user-select:none}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec>summary::after{content:"\25BE";color:var(--tx2);font-size:11px;margin-left:10px}
+  .sec[open]>summary::after{content:"\25B4"}
+  .sec>summary>button{margin-left:auto;min-height:0;padding:3px 9px;border-radius:8px}
+  .sec .body{padding:0 16px 16px}
 
-  /* 단계 줄 — 사진 → 커버 → 보정 → 내보내기 */
-  #modes{display:flex;gap:5px;padding:5px 10px 7px;border-top:1px solid var(--line)}
-  .mode{flex:1 1 0;min-width:0;padding:7px 0 6px;background:none;border:0;box-shadow:none;
-        min-height:0;border-radius:13px;color:var(--tx2);font-size:10.5px;line-height:1.2;
-        display:flex;flex-direction:column;align-items:center;gap:4px}
-  .mode svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;
-            stroke-linecap:round;stroke-linejoin:round}
-  .mode .n{font-size:10.5px}
-  .mode .s{font-size:9px;opacity:.75}
-  .mode.on{background:var(--acc);color:var(--accTx);font-weight:700}
+  /* ---------- 하단 고정 바 ---------- */
+  .dock{flex:0 0 auto;z-index:40;display:flex;gap:8px;
+        padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+        background:var(--glass);
+        -webkit-backdrop-filter:blur(26px) saturate(180%);
+        backdrop-filter:blur(26px) saturate(180%);
+        border-top:1px solid var(--gEdge)}
+  .dock button{flex:1 1 0;min-height:46px;font-size:14.5px}
 
-  /* ---------- 조절판 안 요소 ---------- */
-  .row{display:flex;align-items:center;gap:9px;margin:11px 0;min-width:0}
-  .row label.k{flex:0 0 74px;font-size:12px;color:var(--tx2);line-height:1.3}
-  .row .grow{flex:1;min-width:0}
+  /* ---------- 설정 요소 (PC 판과 같은 결, 손가락 크기로) ---------- */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:11px 0;min-width:0}
+  .row label.k{flex:0 0 auto;font-size:13px;color:var(--tx2);line-height:1.3}
+  .row .grow{flex:1 1 auto;min-width:0}
+  .row input[type=text],.row select{flex:1 1 auto;min-width:0}
 
-  /* 글꼴 16px — 이보다 작으면 아이폰에서 입력할 때 화면이 확대된다 */
+  /* 글꼴 16px — 이보다 작으면 아이폰이 입력할 때 화면을 확대한다 */
   input[type=text],textarea,select{width:100%;background:var(--field);color:var(--tx);
-      border:1px solid var(--fieldBd);border-radius:10px;padding:9px 11px;font:inherit;font-size:16px;
+      border:1px solid var(--fieldBd);border-radius:10px;padding:10px 11px;font:inherit;font-size:16px;
       box-shadow:var(--fieldSh)}
-  select{appearance:none;-webkit-appearance:none;padding-right:34px;
+  select{appearance:none;-webkit-appearance:none;padding-right:34px;min-height:44px;
       text-overflow:ellipsis;white-space:nowrap;overflow:hidden;
       background-image:var(--chevImg);
       background-repeat:no-repeat;background-position:right 12px center}
+  input[type=text]{min-height:44px}
   input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc);
       box-shadow:0 0 0 3px rgba(220,63,92,.18)}
   input[type=text]::placeholder,textarea::placeholder{color:var(--tx2);opacity:.8}
-  textarea{resize:vertical;min-height:76px;line-height:1.45}
+  textarea{resize:vertical;min-height:76px;line-height:1.45;margin-top:2px}
+
+  /* 슬라이더는 이름·값이 위, 트랙이 아래 한 줄 가득 — 손가락으로 미세 조절하기 좋게 */
   input[type=range]{width:100%;height:30px;margin:0;touch-action:pan-y;
       -webkit-appearance:none;appearance:none;background:transparent}
   input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:var(--sb)}
@@ -228,26 +195,25 @@
       box-shadow:0 1px 5px rgba(20,20,45,.28)}
   input[type=range]::-moz-range-track{height:2px;border-radius:2px;background:var(--sb)}
   input[type=range]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;
-      background:var(--field);border:1.7px solid var(--acc);box-shadow:0 1px 5px rgba(20,20,45,.28)}
-  /* 색온도·색조는 어느 쪽으로 가는지 트랙 색으로 보이게 */
+      background:var(--field);border:1.7px solid var(--acc)}
   #fTmp::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#5b8dd9,#e8c85a)}
   #fTmp::-moz-range-track{height:3px;background:linear-gradient(90deg,#5b8dd9,#e8c85a)}
   #fTint::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#5fbf7a,#d066c4)}
   #fTint::-moz-range-track{height:3px;background:linear-gradient(90deg,#5fbf7a,#d066c4)}
-
   @supports selector(:has(*)){
     .row:has(> input[type=range]){display:grid;grid-template-columns:1fr auto;align-items:center;
         column-gap:8px;margin:5px 0 7px}
-    .row:has(> input[type=range]) > label.k{flex:none;grid-area:1/1;font-size:12.5px;color:var(--tx)}
-    .row:has(> input[type=range]) > .val{flex:none;grid-area:1/2;font-size:12px}
+    .row:has(> input[type=range]) > label.k{grid-area:1/1;font-size:12.5px;color:var(--tx)}
+    .row:has(> input[type=range]) > .val{grid-area:1/2;font-size:12px}
     .row:has(> input[type=range]) > input[type=range]{grid-area:2/1/3/3;width:100%}
   }
-  input[type=color]{width:44px;height:34px;flex:0 0 44px;padding:0;border:1px solid var(--fieldBd);
+  input[type=color]{width:46px;height:36px;flex:0 0 46px;padding:0;border:1px solid var(--fieldBd);
       border-radius:9px;background:var(--field);box-shadow:var(--fieldSh)}
-  .val{flex:0 0 46px;text-align:right;font-size:11px;color:var(--tx2);font-variant-numeric:tabular-nums}
+  .val{flex:0 0 46px;text-align:right;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
 
-  .sw{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-size:13px;padding:4px 0}
-  .sw input{-webkit-appearance:none;appearance:none;position:relative;flex:0 0 40px;
+  .sw{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-size:13px;padding:2px 0;
+      justify-content:flex-end;text-align:right}
+  .sw input{-webkit-appearance:none;appearance:none;position:relative;flex:0 0 40px;order:2;
       width:40px;height:23px;margin:0;border-radius:999px;background:var(--sb);
       border:0;transition:.16s;cursor:pointer}
   .sw input::after{content:"";position:absolute;top:2.5px;left:2.5px;width:18px;height:18px;
@@ -256,18 +222,20 @@
   .sw input:checked::after{transform:translateX(17px)}
 
   button{background:var(--field);color:var(--tx);border:1px solid var(--fieldBd);border-radius:11px;
-         padding:10px 13px;font:inherit;font-size:13px;min-height:40px;
+         padding:10px 13px;font:inherit;font-size:13.5px;min-height:44px;
          box-shadow:var(--fieldSh);-webkit-appearance:none}
   button:active{filter:brightness(.94)}
   button.pri{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700;
              box-shadow:0 6px 18px rgba(220,63,92,.30)}
   .btns{display:flex;gap:6px;flex-wrap:wrap}
+  .btns button{flex:1 1 auto}
 
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-  .chip{padding:8px 13px;border:1px solid var(--fieldBd);border-radius:999px;font-size:12.5px;
-        background:var(--field);color:var(--tx);box-shadow:var(--fieldSh)}
+  .chip{flex:1 1 auto;text-align:center;padding:11px 10px;border:1px solid var(--fieldBd);
+        border-radius:10px;font-size:13px;background:var(--field);color:var(--tx);
+        box-shadow:var(--fieldSh);white-space:nowrap}
   .chip.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
-  .hint{font-size:11.5px;color:var(--tx2);line-height:1.6;margin:8px 0 0}
+  .hint{font-size:12px;color:var(--tx2);line-height:1.6;margin:8px 0 0;word-break:keep-all}
 
   #drop{border:1.5px dashed var(--sb);border-radius:13px;padding:16px 10px;text-align:center;
         color:var(--tx2);font-size:13px;background:var(--glass2)}
@@ -276,20 +244,20 @@
   #curveWrap{border:1px solid var(--gEdge);border-radius:11px;overflow:hidden;background:var(--graph)}
   #curve{display:block;width:100%;height:190px;touch-action:none}
   .chan{display:flex;gap:5px;margin:9px 0 7px}
-  .chan div{flex:1;text-align:center;padding:9px 0;font-size:12px;border-radius:9px;
+  .chan div{flex:1;text-align:center;padding:10px 0;font-size:12.5px;border-radius:9px;
             border:1px solid var(--fieldBd);background:var(--field);color:var(--tx);
             box-shadow:var(--fieldSh)}
   .chan div.on{background:var(--acc);color:var(--accTx);border-color:transparent;font-weight:700}
 
   #theme{display:flex;border:1px solid var(--fieldBd);border-radius:999px;overflow:hidden;
          background:var(--field);box-shadow:var(--fieldSh)}
-  #theme button{flex:1;border:0;border-radius:0;padding:8px 6px;font-size:12px;background:transparent;
+  #theme button{flex:1;border:0;border-radius:0;padding:9px 6px;font-size:12.5px;background:transparent;
                 color:var(--tx2);min-height:0;box-shadow:none}
   #theme button+button{border-left:1px solid var(--line)}
   #theme button.on{background:var(--acc);color:var(--accTx);font-weight:700}
 
   #toast{position:fixed;left:50%;transform:translateX(-50%);
-         bottom:calc(var(--bh, 130px) + 12px);z-index:40;
+         bottom:calc(80px + env(safe-area-inset-bottom));z-index:41;
          background:var(--glass);color:var(--tx);
          -webkit-backdrop-filter:blur(20px) saturate(180%);
          backdrop-filter:blur(20px) saturate(180%);
@@ -317,7 +285,7 @@
   #prog .foot button{border-radius:999px;padding:8px 20px}
 
   /* 완료 알림 */
-  #done{position:fixed;left:10px;right:10px;bottom:calc(var(--bh, 120px) + 10px);z-index:71;
+  #done{position:fixed;left:10px;right:10px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:71;
         display:none;align-items:center;gap:10px;padding:13px 14px;border-radius:13px;
         background:rgba(24,104,72,.96);color:#fff;font-size:13px;
         box-shadow:0 10px 28px rgba(0,0,0,.28)}
@@ -363,40 +331,33 @@
   #help b{font-weight:700}
   #help .foot{display:flex;justify-content:flex-end;margin-top:20px}
 
-  /* 화면이 넓으면(태블릿·가로) 조절판 폭만 가운데로 모은다 */
-  @media (min-width:700px){
-    #side{padding:0 max(14px, calc((100% - 660px)/2))}
-    #cats{justify-content:center}
-    #modes{max-width:660px;margin:0 auto}
+  /* 화면이 넓으면(태블릿·가로) 본문 폭만 가운데로 모은다 */
+  @media (min-width:760px){
+    .work{max-width:720px;margin:0 auto;width:100%}
+    .dock{padding-left:calc((100vw - 720px)/2 + 12px);padding-right:calc((100vw - 720px)/2 + 12px)}
   }
 </style>
 </head>
 <body>
-<div id="app">
+<header id="head">
+  <img id="brand" alt="musicITs">
+  <h1>매거진 커버 메이커</h1>
+  <p>사진을 넣으면 바로 매거진 표지가 됩니다</p>
+  <button id="helpBtn" class="ic" title="사용 방법" aria-label="사용 방법">?</button>
+</header>
 
-  <header id="head">
-    <div id="ttl">
-      <img id="brand" alt="musicITs">
-      <h1>매거진 커버 메이커</h1>
+<main class="work">
+
+  <section id="stage" aria-label="미리보기">
+    <div class="cvwrap">
+      <canvas id="cv"></canvas>
+      <div id="empty"><div class="msg"><b>사진을 넣어주세요</b>여기를 눌러 앨범 · 카메라 · 드라이브에서 고르기<br>(여러 장 한꺼번에 가능)</div></div>
     </div>
-    <button id="helpBtn" class="ic" title="사용 방법" aria-label="사용 방법">?</button>
-    <button id="topShare" class="ic" title="공유" aria-label="공유">
-      <svg viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
-    </button>
-    <button id="topSave" class="ic on" title="저장" aria-label="저장">
-      <svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></svg>
-    </button>
-  </header>
-
-  <div id="stage">
-    <canvas id="cv"></canvas>
-    <div id="empty"><div class="msg"><b>사진을 넣어주세요</b>여기를 눌러 앨범 · 카메라 · 드라이브에서 고르기<br>(여러 장 한꺼번에 가능)</div></div>
+    <div id="film"><div id="thumbs"></div></div>
     <div id="bar"><span id="info">사진을 넣어주세요</span></div>
-  </div>
+  </section>
 
-  <div id="bottom">
-    <div id="tray">
-      <div id="side">
+  <aside id="side">
   <details class="sec" open>
     <summary>1. 사진</summary>
     <div class="body">
@@ -410,7 +371,7 @@
       <input type="file" id="file" accept="image/*" multiple hidden>
       <input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
       <input type="file" id="fileAny" multiple hidden>
-      <div class="hint">미리보기에서 <b>한 손가락</b>으로 끌면 위치 이동, <b>두 손가락</b>을 벌리면 확대·축소.<br>미리보기의 제호·문구를 <b>톡</b> 치면 그 항목의 조절판이 바로 열립니다.</div>
+      <div class="hint">미리보기에서 <b>한 손가락</b>으로 끌면 위치 이동, <b>두 손가락</b>을 벌리면 확대·축소.<br>미리보기의 제호·문구를 <b>톡</b> 치면 그 항목으로 바로 내려갑니다.</div>
       <div class="row"><label class="k">확대</label><input type="range" id="zoom" min="0.3" max="4" step="0.005" value="1"><span class="val" id="zoomV">1.00</span></div>
       <div class="btns"><button id="fit">사진 맞춤</button><button id="clear">전체 비우기</button></div>
     </div>
@@ -622,8 +583,8 @@
   <details class="sec" open data-hl="logo">
     <summary>13. 뮤직잇츠 로고 (서명)</summary>
     <div class="body">
-      <div class="row"><label class="k">넣기</label>
-        <label class="sw"><input type="checkbox" id="logoOn" checked><span>블로그 썸네일처럼 세로 서명</span></label></div>
+      <input type="checkbox" id="logoOn" checked hidden>
+      <div class="hint" style="margin:2px 0 10px">뮤직잇츠 서명은 <b>항상 들어갑니다</b>. 위치·크기·색은 아래에서 바꾸세요.</div>
       <div class="row"><label class="k">겹침 방지</label>
         <label class="sw"><input type="checkbox" id="logoAvoid" checked><span>커버라인이 서명을 피하도록</span></label></div>
       <div class="row"><label class="k">위치</label><select id="logoPos">
@@ -633,7 +594,7 @@
         <option value="bl">왼쪽 아래 (가로)</option>
         <option value="bc">아래 가운데 (가로)</option>
         <option value="tr">오른쪽 위 (가로)</option></select></div>
-      <div class="row"><label class="k">크기</label><input type="range" id="logoSize" min="3" max="34" step="0.2" value="9"><span class="val" id="logoSizeV">9</span></div>
+      <div class="row"><label class="k">크기</label><input type="range" id="logoSize" min="3" max="34" step="0.2" value="6"><span class="val" id="logoSizeV">6</span></div>
       <div class="row"><label class="k">여백</label><input type="range" id="logoPad" min="0" max="12" step="0.2" value="3.5"><span class="val" id="logoPadV">3.5%</span></div>
       <div class="row"><label class="k">미세 이동</label><input type="range" id="logoNudge" min="-40" max="40" step="0.5" value="0"><span class="val" id="logoNudgeV">0</span></div>
       <div class="row"><label class="k">색</label><input type="color" id="logoC" value="#ffffff">
@@ -660,15 +621,14 @@
       <div class="hint"><b>공유</b>를 쓰면 아이폰·갤럭시의 공유창이 떠서 사진 앨범이나 카톡으로 바로 보낼 수 있습니다.<br>설정은 자동 저장돼서 창을 닫았다 열어도 그대로입니다. 사진은 저장되지 않습니다.</div>
     </div>
   </details>
-      </div><!-- /#side -->
-    </div><!-- /#tray -->
+  </aside>
+</main>
 
-    <div id="film"><div id="thumbs"></div></div>
-    <div id="cats"></div>
-    <div id="modes"></div>
-  </div><!-- /#bottom -->
+<div class="dock">
+  <button id="dockPick" type="button">사진 선택</button>
+  <button class="pri" id="dockSave" type="button">저장</button>
+</div>
 
-</div><!-- /#app -->
 <div id="toast"></div>
 
 <div id="progBg">
@@ -699,24 +659,24 @@
     <div class="sub">휴대폰용입니다. 사진을 넣으면 바로 커버가 되고, 아무것도 서버로 올라가지 않습니다.</div>
 
     <h3>0 · 화면 보는 법</h3>
-    <p>사진 편집 앱과 같은 짜임새입니다. 위는 미리보기, 아래는 도구바예요.</p>
+    <p>위는 미리보기, 아래는 설정입니다. 폰 목업 스튜디오와 같은 짜임새예요.</p>
     <ul>
-      <li>맨 아래 줄이 <b>단계</b> 입니다 — <b>사진</b> 으로 고르고, <b>커버</b> 로 조판하고, <b>보정</b> 으로 색을 만지고, <b>내보내기</b> 로 저장합니다.</li>
-      <li>그 위 줄은 지금 단계의 <b>항목</b> 입니다. 누르면 그 항목의 조절판만 올라옵니다. 한 번 더 누르면 접혀서 미리보기가 다시 커집니다.</li>
-      <li>사진이 두 장 이상이면 항목 줄 위에 <b>작은 사진 줄</b> 이 생깁니다. 눌러서 사진을 바꾸고 <b>×</b> 로 뺍니다. 커버 설정은 그대로 유지돼요.</li>
-      <li>오른쪽 위 <b>저장</b> · <b>공유</b> 는 어느 단계에서든 바로 쓸 수 있습니다.</li>
+      <li><b>미리보기는 화면 위에 붙어 있습니다.</b> 아래로 설정을 넘겨도 커버가 계속 보이니, 슬라이더를 만지면서 바로 확인할 수 있어요.</li>
+      <li>설정은 <b>1. 사진</b> 부터 <b>14. 내보내기</b> 까지 차례로 있습니다. 제목 줄을 누르면 접혀서 건너뛰기 좋습니다.</li>
+      <li>사진이 두 장 이상이면 미리보기 아래에 <b>작은 사진 줄</b> 이 생깁니다. 눌러서 사진을 바꾸고 <b>×</b> 로 뺍니다. 커버 설정은 그대로 유지돼요.</li>
+      <li>맨 아래 <b>[사진 선택]</b> 과 <b>[저장]</b> 은 어디서든 바로 쓸 수 있습니다. <b>[저장]</b> 은 휴대폰 공유창을 띄워 사진 앨범으로 바로 보냅니다.</li>
     </ul>
 
     <h3>1 · 사진 넣기</h3>
     <ul>
-      <li><b>사진</b> 단계에서 <b>넣기</b> 를 누르면 앨범·카메라·파일(구글 드라이브)에서 고를 수 있습니다. 여러 장 한꺼번에 됩니다.</li>
+      <li>맨 아래 <b>[사진 선택]</b> 을 누르면 앨범·카메라·파일(구글 드라이브) 중에서 고를 수 있습니다. 여러 장 한꺼번에 됩니다.</li>
       <li>미리보기에서 <b>한 손가락</b>으로 끌면 사진 위치, <b>두 손가락</b>을 벌리면 확대·축소입니다.</li>
-      <li>사진이 여러 장이면 도구바의 <b>작은 사진 줄</b> 에서 눌러 넘깁니다. <b>×</b> 로 뺍니다. 설정은 그대로 유지됩니다.</li>
+      <li>사진이 여러 장이면 미리보기 아래 <b>작은 사진 줄</b> 에서 눌러 넘깁니다. <b>×</b> 로 뺍니다. 설정은 그대로 유지됩니다.</li>
     </ul>
 
     <h3>2 · 매거진 고르기</h3>
     <ul>
-      <li><b>커버</b> 단계 → <b>제호</b> 의 매거진 목록에서 고르면 제호 서체·자간뿐 아니라 <b>그 잡지가 실제로 문구를 놓는 자리</b>까지 예시로 채워집니다.</li>
+      <li><b>3. 제호</b> 의 매거진 목록에서 고르면 제호 서체·자간뿐 아니라 <b>그 잡지가 실제로 문구를 놓는 자리</b>까지 예시로 채워집니다.</li>
       <li>예시 문구를 지우고 내 문구로 바꾸면 됩니다. 자리만 참고하세요.</li>
       <li><b>가로 맞춤</b>을 켜면 제호가 좌우 여백을 꽉 채웁니다(실제 커버 방식). 끄면 크기 슬라이더로 직접 조절합니다.</li>
     </ul>
@@ -739,7 +699,7 @@
 
     <h3>5 · 저장</h3>
     <ul>
-      <li>오른쪽 위 <b>저장</b>은 파일로 내려받고, <b>공유</b>는 휴대폰 공유창을 띄워 사진 앨범·카톡으로 바로 보냅니다.</li>
+      <li>맨 아래 <b>[저장]</b> 은 공유창을 띄워 사진 앨범·카톡으로 바로 보냅니다. 파일로 내려받으려면 <b>14. 내보내기</b> 의 <b>이 커버 PNG 저장</b> 을 쓰세요.</li>
       <li>인스타에 올릴 거면 <b>1080px</b>, 보관·인쇄용이면 <b>2160px</b> 이상을 고르세요.</li>
       <li>설정은 자동 저장돼서 창을 닫았다 열어도 그대로입니다. <b>사진은 저장되지 않습니다.</b></li>
     </ul>
@@ -1028,10 +988,8 @@ let DW = 1080, DH = 1350;
 function layout(){
   DW = RATIOS[ratioIdx][1]; DH = RATIOS[ratioIdx][2];
   cv.width = DW*PV; cv.height = DH*PV;
-  const st = $("#stage");
-  const cs = getComputedStyle(st);
-  const av = st.clientHeight - (parseFloat(cs.paddingTop)||0) - (parseFloat(cs.paddingBottom)||0);
-  const s = Math.max(0.02, Math.min((st.clientWidth - 18)/DW, (av - 4)/DH));
+  const box = document.querySelector(".cvwrap");
+  const s = Math.max(0.02, Math.min(box.clientWidth/DW, box.clientHeight/DH));
   cv.style.width = (DW*s) + "px"; cv.style.height = (DH*s) + "px";
 }
 window.addEventListener("resize", ()=>{ layout(); render(); });
@@ -1939,7 +1897,7 @@ const KEYS = ["presetSel","margin","mast","kicker","kickAlign","mastFont","mastW
   "fGrain","fVig","fTop","fBot","fltName","fltAmt",
   "logoPos","logoSize","logoPad","logoNudge","logoC","logoO","logoSh",
   "ovX","ovY","ovW","ovH","ovFeather","expW"];
-const CHECKS = ["mastFit","logoOn","logoAvoid","kickItalic","mastNoFill","ovOn"];
+const CHECKS = ["mastFit","logoAvoid","kickItalic","mastNoFill","ovOn"];   /* logoOn 은 늘 켜짐 */
 function save(){
   const d = {ratioIdx:ratioIdx, curves:curves,
              issueChar:$("#issueChar").value, kickChar:$("#kickChar").value};
@@ -2015,7 +1973,7 @@ $("#helpClose").onclick = ()=>openHelp(false);
 helpBg.addEventListener("mousedown", e=>{ if(e.target === helpBg) openHelp(false); });
 window.addEventListener("keydown", e=>{ if(e.key === "Escape") openHelp(false); });
 
-/* (PC 의 사이드바 너비 조절은 모바일에 없다) */
+function headH(){}   /* (PC 의 레일 너비 조절은 모바일에 없다) */
 
 /* ---- 편집 위치 표시 & 섹션별 초기화 ---- */
 function setHL(k){
@@ -2040,7 +1998,7 @@ const SEC_FIELDS = {
   color: ["fTmp","fTint","fVib","fSat","fGry"],
   filter: ["fltName","fltAmt"],
   curve: [],
-  logo:  ["logoOn","logoAvoid","logoPos","logoSize","logoPad","logoNudge","logoC","logoO","logoSh"]
+  logo:  ["logoAvoid","logoPos","logoSize","logoPad","logoNudge","logoC","logoO","logoSh"]
 };
 const DEFAULTS = {};
 document.querySelectorAll("#side input, #side select, #side textarea").forEach(el=>{
@@ -2113,15 +2071,17 @@ async function preloadFonts(){
     jobs.push(document.fonts.load('italic 700 40px ' + fam).catch(()=>{}));
   });
   await Promise.all(jobs);
+  headH();
   render(); drawCurve();
 }
 
 /* ================= 시작 ================= */
 const hadSaved = load();
+$("#logoOn").checked = true;      /* 서명은 항상 — 예전에 꺼둔 설정이 남아 있어도 켠다 */
 applyTheme(savedTheme);
 fillIssueChars(pendingIssueChar !== undefined ? pendingIssueChar : 1,
                pendingKickChar  !== undefined ? pendingKickChar  : 0);
-layout();
+headH(); layout();
 if(!hadSaved) applyPreset();      /* 처음 열면 선택된 매거진 조판을 실제로 적용 */
 sync(); render(); drawCurve();
 if(document.fonts){
@@ -2143,154 +2103,36 @@ if(document.fonts){
      아래④  단계 줄 — 사진 → 커버 → 보정 → 내보내기
    ========================================================================= */
 
-/* ---------------- 아이콘 ---------------- */
-const IC = {
-  photo:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.4"/><path d="M4 17l4.5-4 3 2.5L15 12l5 5"/>',
-  ratio:'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 9h16"/>',
-  mast: '<path d="M4 7.5V5h16v2.5M12 5v14M8.5 19h7"/>',
-  overlay:'<path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M4 12.5L12 17l8-4.5"/>',
-  issue:'<path d="M4.5 9h15M4.5 15h15M10 4l-2 16M17 4l-2 16"/>',
-  colL: '<path d="M4 6h11M4 10h16M4 14h11M4 18h8"/>',
-  colR: '<path d="M9 6h11M4 10h16M9 14h11M12 18h8"/>',
-  head: '<path d="M5 19V5h5a3.5 3.5 0 010 7H5m0 0h6a3.5 3.5 0 010 7H5z"/>',
-  body: '<path d="M4 5v14M7.5 5v14M11 5v14M14 5v10M17 5v14M20 5v14"/>',
-  light:'<circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>',
-  color:'<path d="M12 3.2s6.2 6.6 6.2 10.4A6.2 6.2 0 015.8 13.6C5.8 9.8 12 3.2 12 3.2z"/>',
-  filter:'<path d="M3.5 5h17v2.6l-6.3 6.3V19l-4.4 2.2v-7.3L3.5 7.6z"/>',
-  curve:'<path d="M4 20V4M4 20h16"/><path d="M4.5 16.5c6.5 0 8-11 15-13"/>',
-  grain:'<circle cx="7" cy="8" r=".9"/><circle cx="12.5" cy="6" r=".9"/><circle cx="17.5" cy="9.5" r=".9"/><circle cx="6.5" cy="14.5" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="17" cy="16" r=".9"/><circle cx="10" cy="18" r=".9"/>',
-  logo: '<path d="M4 16.5c4-.5 5.5-9.5 8.5-9.5S15 14 20 12.5"/><path d="M4 20h16"/>',
-  export:'<path d="M12 4v11M8 11l4 4 4-4M5 20h14"/>',
-  cover:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7.5h8M8 11h5"/>',
-  tone: '<path d="M4 8h8M16.5 8H20M4 16h3.5M12 16h8"/><circle cx="14.2" cy="8" r="2.2"/><circle cx="9.7" cy="16" r="2.2"/>'
-};
-const svg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + IC[k] + '</svg>';
+/* ---------------- 화면 크기 ----------------
+   머리말 높이와 미리보기 높이를 CSS 에 알려준다. 미리보기 카드는 스크롤해도
+   화면 위에 붙어 있으므로(sticky) 높이가 고정이어야 덜컹거리지 않는다. */
+const sideEl = $("#side"), stageEl = $("#stage");
+const secs = Array.from(document.querySelectorAll("#side details.sec"));
 
-/* ---------------- 단계와 항목 ----------------
-   i = PC 판 메뉴 차례 (1.사진 … 14.내보내기). 줄에 놓는 순서는 이 배열 순서. */
-const MODES = [
-  {key:"photo",  name:"사진",   sub:"고르기",  icon:"photo"},
-  {key:"cover",  name:"커버",   sub:"조판",    icon:"cover"},
-  {key:"tone",   name:"보정",   sub:"빛·색",   icon:"tone"},
-  {key:"export", name:"내보내기", sub:"저장",   icon:"export"}
-];
-const CATS = [
-  {i:0,  m:"photo",  label:"사진 넣기", icon:"photo"},
-  {i:1,  m:"photo",  label:"판형",     icon:"ratio"},
-
-  {i:2,  m:"cover",  label:"제호",     icon:"mast"},
-  {i:4,  m:"cover",  label:"발행 정보", icon:"issue"},
-  {i:5,  m:"cover",  label:"커버라인 왼쪽", icon:"colL"},
-  {i:6,  m:"cover",  label:"커버라인 오른쪽", icon:"colR"},
-  {i:7,  m:"cover",  label:"헤드라인",  icon:"head"},
-  {i:8,  m:"cover",  label:"서체·바코드", icon:"body"},
-  {i:3,  m:"cover",  label:"로고 앞으로", icon:"overlay"},
-  {i:14, m:"cover",  label:"서명",     icon:"logo"},
-
-  {i:9,  m:"tone",   label:"빛",       icon:"light"},
-  {i:10, m:"tone",   label:"색",       icon:"color"},
-  {i:11, m:"tone",   label:"필터",     icon:"filter"},
-  {i:12, m:"tone",   label:"곡선",     icon:"curve"},
-  {i:13, m:"tone",   label:"질감",     icon:"grain"},
-
-  {i:15, m:"export", label:"내보내기",  icon:"export"}
-];
-/* 짧은 이름 — 항목 줄에는 좁게 들어가야 한다 */
-const SHORT = {"사진 넣기":"넣기","발행 정보":"발행","커버라인 왼쪽":"왼쪽","커버라인 오른쪽":"오른쪽",
-               "서체·바코드":"서체","로고 앞으로":"로고앞","내보내기":"저장"};
-
-const secs   = Array.from(document.querySelectorAll("#side details.sec"));
-const trayEl = $("#tray"), sideEl = $("#side"), catsEl = $("#cats"),
-      modesEl = $("#modes"), filmEl = $("#film"), bottomEl = $("#bottom");
-let mode = "photo", openCat = -1;
-
-/* 다시 그리기는 한 프레임에 한 번만 */
 let layoutPending = false;
 function relayout(){
   if(layoutPending) return;
   layoutPending = true;
   requestAnimationFrame(()=>{
     layoutPending = false;
-    /* 조절판이 덮는 높이 — 미리보기는 그 위 공간에 맞춰 커진다 */
-    document.documentElement.style.setProperty("--trayH",
-      (trayEl.classList.contains("on") ? trayEl.offsetHeight : 0) + "px");
+    const root = document.documentElement.style;
+    root.setProperty("--hh", $("#head").offsetHeight + "px");
+    /* 미리보기 = 화면의 38% (최소 190px), 나머지는 설정 레일 몫 */
+    const h = Math.max(190, Math.round(window.innerHeight * 0.38));
+    root.setProperty("--pvH", h + "px");
     layout(); render();
-    /* 곡선판은 숨어 있는 동안 크기를 잴 수 없다 — 보일 때 다시 그린다 */
-    if(secs[12] && secs[12].classList.contains("on")) drawCurve();
-    document.documentElement.style.setProperty("--bh", bottomEl.offsetHeight + "px");
   });
 }
 window.addEventListener("resize", relayout);
+window.addEventListener("orientationchange", ()=>setTimeout(relayout, 250));
 if(window.visualViewport) window.visualViewport.addEventListener("resize", relayout);
 
-/* ---------------- 단계 줄 ---------------- */
-MODES.forEach(m=>{
-  const b = document.createElement("button");
-  b.className = "mode"; b.dataset.m = m.key;
-  b.innerHTML = svg(m.icon) + '<span class="n">' + m.name + '</span>';
-  b.onclick = ()=>setMode(m.key);
-  modesEl.appendChild(b);
-});
-function setMode(k, keepCat){
-  mode = k;
-  Array.from(modesEl.children).forEach(b=>b.classList.toggle("on", b.dataset.m === k));
-  buildCats();
-  if(!keepCat){
-    /* 내보내기는 항목이 하나뿐이라 바로 펼친다 */
-    if(k === "export") showCat(15); else closeTray();
-  }
-  try{ localStorage.setItem("magcover_m_mode", k); }catch(e){}
-}
-
-/* ---------------- 항목 줄 ---------------- */
-function buildCats(){
-  catsEl.innerHTML = "";
-  CATS.filter(c=>c.m === mode).forEach(c=>{
-    const b = document.createElement("button");
-    b.className = "cat" + (c.i === openCat ? " on" : "");
-    b.dataset.i = c.i;
-    b.innerHTML = svg(c.icon) + "<span>" + (SHORT[c.label] || c.label) + "</span>";
-    b.onclick = ()=>{ (c.i === openCat) ? closeTray() : showCat(c.i); };
-    catsEl.appendChild(b);
-  });
-}
-function markCats(){
-  Array.from(catsEl.children).forEach(b=>b.classList.toggle("on", +b.dataset.i === openCat));
-  const on = catsEl.querySelector(".cat.on");
-  if(on) catsEl.scrollTo({left: on.offsetLeft - 70, behavior:"smooth"});
-}
-function showCat(i){
-  const d = secs[i]; if(!d) return;
-  openCat = i;
-  secs.forEach((x, j)=>{ x.classList.toggle("on", j === i); x.open = (j === i); });
-  trayEl.classList.add("on");
-  sideEl.classList.toggle("tall", d.dataset.hl === "curve");   /* 곡선은 넓게 */
-  markCats();
-  sideEl.scrollTop = 0;
-  relayout();
-}
-function closeTray(){
-  openCat = -1;
-  trayEl.classList.remove("on");
-  secs.forEach(x=>x.classList.remove("on"));
-  markCats();
-  relayout();
-}
-/* 조절판 머리글(제목·↺·✕)을 누르면 접는다 — 열고 닫기는 항목 줄이 맡는다 */
-secs.forEach((d, i)=>{
-  const sm = d.querySelector("summary");
-  const c = CATS.find(x=>x.i === i);
-  if(c && sm.firstChild && sm.firstChild.nodeType === 3) sm.firstChild.nodeValue = c.label;
-  sm.addEventListener("click", e=>{ e.preventDefault(); closeTray(); });
-});
-/* 미리보기에서 요소를 누르면 그 항목이 열린다 (엔진의 탭 판정이 부른다) */
+/* 미리보기에서 요소를 누르면 그 항목으로 데려간다 (엔진의 탭 판정이 부른다) */
 function openSection(key){
   const d = document.querySelector('#side details[data-hl="' + key + '"]');
   if(!d) return;
-  const i = secs.indexOf(d);
-  const c = CATS.find(x=>x.i === i); if(!c) return;
-  if(c.m !== mode) setMode(c.m, true);
-  showCat(i);
+  d.open = true;
+  sideEl.scrollTo({top: Math.max(0, d.offsetTop - 4), behavior:"smooth"});
 }
 
 /* ---------------- 미리보기 손가락 조작 ----------------
@@ -2438,14 +2280,12 @@ async function rescueImage(f){
 
 /* ---------------- 화면 상태 갱신 (엔진의 render() 에 얹는다) ---------------- */
 const _render = render;
-let filmOn = null;
 render = function(){
   _render();
   const n = imgs.length;
   $("#empty").classList.toggle("off", n > 0);
   $("#bar").style.display = n ? "" : "none";
-  const want = n > 1;
-  if(want !== filmOn){ filmOn = want; filmEl.classList.toggle("on", want); relayout(); }
+  $("#film").classList.toggle("on", n > 1);
 };
 
 /* ---------------- 저장 진행창 · 완료 알림 ---------------- */
@@ -2534,16 +2374,15 @@ async function shareCover(){
     done("공유를 지원하지 않아 파일로 저장했습니다");
   }
 }
-$("#share").onclick     = shareCover;
-$("#topShare").onclick  = shareCover;
-$("#topSave").onclick   = ()=>$("#save").click();
+$("#share").onclick    = shareCover;
+$("#dockPick").onclick = ()=>openPick();
+/* 하단 바의 [저장] 은 공유창을 먼저 띄운다 — 사진 앨범에 바로 넣는 길이 제일 짧다 */
+$("#dockSave").onclick = shareCover;
 
 /* ---------------- 시작 상태 ---------------- */
-let startMode = "photo";
-try{ startMode = localStorage.getItem("magcover_m_mode") || "photo"; }catch(e){}
-if(!MODES.some(m=>m.key === startMode)) startMode = "photo";
-setMode(startMode);
-render(); drawCurve(); relayout();
+secs.forEach(d=>{ d.open = true; });     /* 폰 목업 스튜디오처럼 모두 펼쳐 둔다 (머리글을 누르면 접힘) */
+relayout();
+render(); drawCurve();
 </script>
 </body>
 </html>
