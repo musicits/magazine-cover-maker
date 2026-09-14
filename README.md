@@ -3,9 +3,9 @@
 사진을 끌어다 놓으면 바로 매거진 표지가 되는 도구입니다. 설치할 것도, 로그인할 것도 없습니다.
 **HTML 파일 하나**로 되어 있고 모든 처리가 브라우저 안에서 끝납니다.
 
-**→ [바로 써보기 (PC)](https://musicits.github.io/magazine-cover-maker/)**
+**→ [바로 써보기 (PC)](https://tools.musicits.com/magazine-cover-maker/)**
 
-**→ [휴대폰으로 쓰기 (모바일)](https://musicits.github.io/magazine-cover-maker/m/)**
+**→ [휴대폰으로 쓰기 (모바일)](https://tools.musicits.com/magazine-cover-maker/m/)**
 
 ---
 
@@ -75,7 +75,7 @@ Nanum Myeongjo · Noto Sans KR · Noto Serif KR · Gowun Batang · Black Han San
 
 ## 휴대폰판 (`m/`)
 
-주소 뒤에 `m/` 만 붙이면 됩니다 — <https://musicits.github.io/magazine-cover-maker/m/>
+주소 뒤에 `m/` 만 붙이면 됩니다 — <https://tools.musicits.com/magazine-cover-maker/m/>
 
 PC 판과 같은 구성을 세로로 쌓았습니다. **위는 미리보기, 아래는 설정.**
 
