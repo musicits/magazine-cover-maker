@@ -78,15 +78,15 @@
      머리말은 한 줄로 가로 전체, 그 아래 왼쪽이 미리보기·오른쪽이 설정 레일. */
   body{overflow:auto}
   #head{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;
-        padding:13px 22px;
+        padding:14px 24px;
         background:var(--glass);
         -webkit-backdrop-filter:blur(26px) saturate(180%);
         backdrop-filter:blur(26px) saturate(180%);
         border-bottom:1px solid var(--line)}
-  #brand{height:24px;width:auto;display:block;flex:0 0 auto;filter:invert(1)}
+  #brand{height:26px;width:auto;display:block;flex:0 0 auto;filter:invert(1)}
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #brand{filter:none} }
   :root[data-theme="dark"] #brand{filter:none}
-  h1{margin:0;font-size:16px;font-weight:700;color:var(--tx);line-height:1.3;
+  h1{margin:0;font-size:16px;font-weight:600;color:var(--tx);line-height:1.3;
      padding-left:16px;border-left:1px solid var(--fieldBd);white-space:nowrap}
   #head p{margin:0;color:var(--tx2);font-size:12.5px}
   #head .sp{flex:1 1 auto}
@@ -244,6 +244,8 @@
   /* 좁은 화면 — 위아래로 쌓는다 (휴대폰은 /m/ 을 쓰세요) */
   @media (max-width:900px){
     #head{padding:10px 14px}
+    #brand{height:19px}
+    h1{font-size:14.5px;padding-left:10px}
     #head p{flex:1 0 100%;order:3;font-size:11.5px}
     #app{grid-template-columns:minmax(0,1fr);gap:12px;padding:12px}
     #grip{display:none}
