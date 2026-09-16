@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>매거진 커버 메이커</title>
+<meta name="description" content="사진 한 장을 넣으면 매거진 표지로 만들어 주는 무료 도구. 설치 없이 브라우저에서 바로 씁니다.">
+<link rel="canonical" href="https://tools.musicits.com/magazine-cover-maker/">
+<meta name="author" content="쭈뉘의 뮤직잇츠 music ITs">
+<link rel="me" href="https://blog.naver.com/musicits">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication",
+ "name":"매거진 커버 메이커","url":"https://tools.musicits.com/magazine-cover-maker/",
+ "applicationCategory":"DesignApplication","operatingSystem":"Web","inLanguage":"ko","isAccessibleForFree":true,
+ "description":"사진 한 장을 넣으면 매거진 표지로 만들어 주는 무료 도구. 설치 없이 브라우저에서 바로 씁니다.",
+ "author":{"@type":"Person","name":"쭈뉘의 뮤직잇츠 music ITs","url":"https://blog.naver.com/musicits","sameAs":["https://blog.naver.com/musicits","https://github.com/musicits"]},
+ "copyrightYear":2026,"copyrightHolder":{"@type":"Person","name":"쭈뉘의 뮤직잇츠 music ITs","url":"https://blog.naver.com/musicits"}}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,96,400;0,96,500;0,96,700;0,96,900;1,96,400;1,96,700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Abril+Fatface&family=Prata&family=DM+Serif+Display:ital@0;1&family=Italiana&family=Archivo+Black&family=Inter:wght@300;400;600;800;900&family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -92,6 +104,13 @@
   #head p{margin:0;color:var(--tx2);font-size:12.5px}
   /* 머리말 제목·설명 글꼴은 폰 목업 스튜디오와 같게 */
   #head h1,#head p{font-family:'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+  /* 하단 출처 — 폰 목업 스튜디오와 같은 모양 */
+  .credit{padding:6px 20px 24px;text-align:center;font-size:11.5px;line-height:1.8;color:var(--tx2);
+          font-family:'Pretendard Variable',Pretendard,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+  .credit p{margin:0}
+  .credit a{color:var(--acc);font-weight:600;text-decoration:none;
+            border-bottom:1px solid color-mix(in srgb,var(--acc) 35%,transparent)}
+  .credit a:hover{border-bottom-color:var(--acc)}
   #head .sp{flex:1 1 auto}
   #theme{display:flex;border:1px solid var(--fieldBd);border-radius:999px;overflow:hidden;
          flex:0 0 auto;background:var(--field);box-shadow:var(--fieldSh)}
@@ -569,6 +588,11 @@
   </details>
 </aside>
 </main>
+<!-- 출처: 블로그 유입 통계에 잡히도록 rel 에 noreferrer 를 넣지 않습니다 -->
+<footer class="credit">
+  <p>만든이 <a href="https://blog.naver.com/musicits" target="_blank" rel="author noopener">쭈뉘의 뮤직잇츠 music ITs</a></p>
+  <p>© 2026 music ITs. All rights reserved.</p>
+</footer>
 <div id="toast"></div>
 
 <div id="helpBg">
