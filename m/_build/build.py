@@ -255,6 +255,7 @@ helpmodal = rep(helpmodal,
 # 섹션마다 data-tab 이름을 붙일 필요는 없다 — 순서대로 탭을 만든다.
 
 # ---------- 4. 조립 ----------
+NAVER_WCS = '<!-- 네이버 애널리틱스 (사이트 music ITs Tools) -->\n<script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>\n<script type="text/javascript">\nif(!wcs_add) var wcs_add = {};\nwcs_add["wa"] = "88f204ce6fba00";\nif(window.wcs) {\n  wcs_do();\n}\n</script>\n'
 head   = io.open(S + "/head.html", encoding="utf-8").read()
 btop   = io.open(S + "/body_top.html", encoding="utf-8").read()
 bbot   = io.open(S + "/body_bottom.html", encoding="utf-8").read()
@@ -264,7 +265,7 @@ head = head.replace("__FONTLINKS__", fontlinks).replace("__TOKENS__", tokens.rst
 
 out = (head + btop + sections + "\n" + bbot + "\n" + helpmodal
        + "\n<script>\n" + js + "</script>\n"
-       + "<script>\n" + extras + "</script>\n</body>\n</html>\n")
+       + "<script>\n" + extras + "</script>\n" + NAVER_WCS + "</body>\n</html>\n")
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 io.open(OUT, "w", encoding="utf-8").write(out)
