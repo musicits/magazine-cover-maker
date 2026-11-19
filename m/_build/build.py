@@ -255,6 +255,7 @@ helpmodal = rep(helpmodal,
 # 섹션마다 data-tab 이름을 붙일 필요는 없다 — 순서대로 탭을 만든다.
 
 # ---------- 4. 조립 ----------
+ANALYTICS = '<!-- 방문 분석: GA4 \'musicits\' (G-BD2X8SCFZ6) · Microsoft Clarity \'musicits\' (zfv265t02g) — musicits.com 과 하위 도메인에서만 켠다 -->\n<script>\n(function(){\n  if(!/(^|\\.)musicits\\.com$/.test(location.hostname)) return;\n  var g=document.createElement(\'script\');g.async=true;g.src=\'https://www.googletagmanager.com/gtag/js?id=G-BD2X8SCFZ6\';document.head.appendChild(g);\n  window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};\n  gtag(\'js\',new Date());gtag(\'config\',\'G-BD2X8SCFZ6\');\n  (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","zfv265t02g");\n})();\n</script>\n'  # GA4·Clarity
 NAVER_WCS = '<!-- 네이버 애널리틱스 (사이트 music ITs Tools) -->\n<script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>\n<script type="text/javascript">\nif(!wcs_add) var wcs_add = {};\nwcs_add["wa"] = "88f204ce6fba00";\nif(window.wcs) {\n  wcs_do();\n}\n</script>\n'
 head   = io.open(S + "/head.html", encoding="utf-8").read()
 btop   = io.open(S + "/body_top.html", encoding="utf-8").read()
@@ -265,7 +266,7 @@ head = head.replace("__FONTLINKS__", fontlinks).replace("__TOKENS__", tokens.rst
 
 out = (head + btop + sections + "\n" + bbot + "\n" + helpmodal
        + "\n<script>\n" + js + "</script>\n"
-       + "<script>\n" + extras + "</script>\n" + NAVER_WCS + "</body>\n</html>\n")
+       + "<script>\n" + extras + "</script>\n" + ANALYTICS + NAVER_WCS + "</body>\n</html>\n")
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 io.open(OUT, "w", encoding="utf-8").write(out)
